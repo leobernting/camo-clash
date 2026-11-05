@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import {battle,act,botTurn,starter} from '../app/game.ts';
+let s=battle(starter().deck,starter().deck);
+s.players[0].hand=[0,10,3,11];
+act(s,0,{kind:'play',index:0});
+assert.equal(s.players[0].mana,0);
+act(s,0,{kind:'attack',index:0,target:-1});
+assert.equal(s.players[1].hp,19,'newly summoned camo attacks');
+assert.throws(()=>act(s,0,{kind:'attack',index:0,target:-1}));
+s.players[0].mana=5;
+act(s,0,{kind:'hide',index:0});
+assert.equal(s.players[0].board[0].hidden,true);
+assert.throws(()=>act(s,0,{kind:'attack',index:0,target:-1}));
+s.players[1].board=[{id:3,hp:5,hidden:true,used:false}];
+assert.throws(()=>act(s,0,{kind:'play',index:2,target:0}));
+s.players[0].board=Array.from({length:5},()=>({id:0,hp:3,hidden:false,used:false}));
+s.players[0].hand=[0];
+assert.throws(()=>act(s,0,{kind:'play',index:0}));
+act(s,0,{kind:'end'});assert.equal(s.players[1].mana,1);botTurn(s);
+for(let j=0;j<25;j++){s=battle(starter().deck,starter().deck);let turns=0;while(s.winner===null&&turns++<100){s.turn=1;botTurn(s);}assert.notEqual(s.winner,null,'bot simulation terminates');}
+console.log('Battle checks passed: instant attacks, once-per-turn actions, hiding, spell targeting, slot limits, mana reset and 25 bot simulations.');
