@@ -1,4 +1,6 @@
 import {env} from 'cloudflare:workers';
+import {accountUser,authenticate} from '../../accounts';
+import {openPacks} from '../../packs';
 import {cards,starter,battle,act,botStep,upgradeProfile} from '../../game';
 export const dynamic='force-dynamic';
 const db=()=>env.DB!;
@@ -6,12 +8,13 @@ async function read(id:string){return await db().prepare('SELECT data,version FR
 async function insert(id:string,data:any){await db().prepare('INSERT OR IGNORE INTO records(id,data,version) VALUES(?,?,0)').bind(id,JSON.stringify(data)).run();}
 async function write(id:string,data:any,v:number){const r=await db().prepare('UPDATE records SET data=?,version=version+1 WHERE id=? AND version=?').bind(JSON.stringify(data),id,v).run();if(!r.meta.changes)throw Error('State changed. Refresh and try again.');}
 function view(g:any,uid:string){const who=g.ids.indexOf(uid);if(who<0)throw Error('This is another player’s match.');const s=structuredClone(g.state);s.players.forEach((p:any,i:number)=>{p.remaining=p.pile.length;p.pile=[];if(i!==who)p.hand=p.hand.map(()=>-1);});return {...s,who,room:g.room};}
-export async function POST(req:Request){try{const uid=req.headers.get('oai-authenticated-user-id');if(!uid)return Response.json({error:'Sign in to play.'},{status:401});const a:any=await req.json();const key='user:'+uid;await insert(key,starter());let row=await read(key),p=JSON.parse(row.data);
+export async function POST(req:Request){try{if(req.headers.get('origin')&&req.headers.get('origin')!==new URL(req.url).origin)throw Error('Invalid origin.');const a:any=await req.json();if(['login','register','logout'].includes(a.kind))return await authenticate(req,a);const uid=await accountUser(req);if(!uid)return Response.json({error:'Sign in to play.'},{status:401});const key='user:'+uid;await insert(key,starter());let row=await read(key),p=JSON.parse(row.data);
  if(p.rulesVersion!==2){upgradeProfile(p);await write(key,p,row.version);row=await read(key);}
+ if(!p.username){if(uid.startsWith('acct:')){const r=await db().prepare("SELECT data FROM records WHERE id LIKE 'account:%' AND json_extract(data,'$.uid')=? LIMIT 1").bind(uid).first<any>();p.username=r?JSON.parse(r.data).username:'Collector';}else p.username='Collector_'+uid.slice(-6);await write(key,p,row.version);row=await read(key);}
  if(a.kind==='profile')return Response.json({profile:p});
  if(a.kind==='save'){const list=a.field==='binder'?a.list:a.list; if(!Array.isArray(list)||list.length>(a.field==='binder'?9:40)||list.some((id:any)=>!Number.isInteger(id)||!p.owned[id])||(a.field!=='binder'&&list.some((id:number)=>list.filter((x:number)=>x===id).length>Math.min(3,p.owned[id]))))throw Error('Invalid selection. Maximum three copies per card.');if(a.field!=='binder'&&list.length!==40)throw Error('A deck needs exactly 40 cards.');p[a.field==='binder'?'binder':'deck']=list;await write(key,p,row.version);return Response.json({profile:p});}
- if(a.kind==='pack'){if(p.coins<100)throw Error('You need 100 coins.');p.coins-=100;const pulls=Array.from({length:5},(_,i)=>{const r=Math.random(),rarity=i===4?(r<.12?'legendary':r<.42?'epic':'rare'):(r<.02?'legendary':r<.10?'epic':r<.33?'rare':'common');const pool=cards.filter(c=>c.rarity===rarity);return pool[Math.floor(Math.random()*pool.length)].id;});pulls.forEach(id=>p.owned[id]=(p.owned[id]||0)+1);await write(key,p,row.version);return Response.json({profile:p,pulls});}
- if(a.kind==='publish'){const code=crypto.randomUUID();await insert('binder:'+code,{cards:p.binder,name:'Canopy Collector'});return Response.json({code});}
+ if(a.kind==='pack'){const result=openPacks(p,a.count??1);await write(key,p,row.version);return Response.json(result);}
+ if(a.kind==='publish'){const code=crypto.randomUUID();await insert('binder:'+code,{cards:p.binder,name:p.username||'Canopy Collector'});return Response.json({code});}
  if(a.kind==='start'){const id=crypto.randomUUID();const g={ids:[uid,'bot'],state:battle(p.deck,starter().deck),room:id,rewarded:false};await insert('match:'+id,g);return Response.json({match:view(g,uid)});}
  if(a.kind==='create'){const id=crypto.randomUUID().slice(0,8).toUpperCase();await insert('room:'+id,{owner:uid,deck:p.deck});return Response.json({code:id});}
  if(a.kind==='join'){const rr=await read('room:'+String(a.code).trim().toUpperCase());if(!rr)throw Error('Room not found.');const room=JSON.parse(rr.data);if(room.owner===uid)throw Error('Share this code with another player.');const id=String(a.code).trim().toUpperCase();await insert('match:'+id,{ids:[room.owner,uid],state:battle(room.deck,p.deck,false),room:id});const gr=await read('match:'+id);return Response.json({match:view(JSON.parse(gr.data),uid)});}

@@ -14,14 +14,17 @@ export const cards = [
  ['Morning Dew',1,0,0,'common','spell','Restore 3 health to all your camos.','#7ac9ce'],
  ['Shed Skin',1,0,0,'common','spell','Draw 2 cards.','#caadce'],
  ['Crimson King',5,6,7,'legendary','camo','The crown of the rainforest.','#df727b'],
- ['Fern Hatchling',1,2,2,'common','camo','Small scales. Big ambitions.','#b1cc6a']
+ ['Fern Hatchling',1,2,2,'common','camo','Small scales. Big ambitions.','#b1cc6a'],
+ ['Prism Scout',1,1,3,'hit','camo','Prismatic edition ? 1 in 100 hit. Harvest: 1 mana.','#71d6ce'],
+ ['Eclipse Mossback',2,2,6,'superhit','camo','Eclipse edition ? 1 in 200 hit. Harvest: 2 mana.','#9e8bdb'],
+ ['Aurora Sovereign',5,6,7,'chase','camo','Chase edition ? a living aurora.','#f6a3db']
 ].map((c,i)=>({id:i,name:c[0] as string,cost:c[1] as number,attack:c[2] as number,hp:c[3] as number,rarity:c[4] as string,type:c[5] as string,text:c[6] as string,color:c[7] as string}));
 
-export const starterDeck=()=>cards.flatMap(c=>Array(c.id<8?3:2).fill(c.id));
-export const starter=()=>({rulesVersion:2,coins:500,owned:Object.fromEntries(cards.map(c=>[c.id,3])),deck:starterDeck(),binder:[4,3,6,1,7,5],wins:0});
-export function upgradeProfile(p:any){if(p.rulesVersion!==2){cards.forEach(c=>p.owned[c.id]=Math.max(3,p.owned[c.id]||0));const next:number[]=[];for(const id of p.deck||[])if(cards[id]&&next.filter(x=>x===id).length<3)next.push(id);for(const id of starterDeck())if(next.length<40&&next.filter(x=>x===id).length<3)next.push(id);p.deck=next;p.rulesVersion=2;}return p;}
+export const starterDeck=()=>cards.filter(c=>c.id<16).flatMap(c=>Array(c.id<8?3:2).fill(c.id));
+export const starter=()=>({rulesVersion:2,coins:500,owned:Object.fromEntries(cards.filter(c=>c.id<16).map(c=>[c.id,3])),deck:starterDeck(),binder:[4,3,6,1,7,5],wins:0});
+export function upgradeProfile(p:any){if(p.rulesVersion!==2){cards.filter(c=>c.id<16).forEach(c=>p.owned[c.id]=Math.max(3,p.owned[c.id]||0));const next:number[]=[];for(const id of p.deck||[])if(cards[id]&&next.filter(x=>x===id).length<3)next.push(id);for(const id of starterDeck())if(next.length<40&&next.filter(x=>x===id).length<3)next.push(id);p.deck=next;p.rulesVersion=2;}return p;}
 export const shuffle=(a:any[])=>a.map(v=>({v,r:Math.random()})).sort((a,b)=>a.r-b.r).map(x=>x.v);
-export const canHarvest=(id:number)=>id===0||id===5;
+export const canHarvest=(id:number)=>id===0||id===5||id===16||id===17;
 export function battle(deck:number[],opponent:number[],bot=true){const side=(d:number[])=>({souls:0,mana:1,hand:[] as number[],pile:shuffle(d),board:Array(5).fill(null),land:-1});const s:any={rulesVersion:2,players:[side(deck),side(opponent)],turn:0,round:1,log:['First to 10 souls wins. Your turn!'],winner:null,bot,nextBotAt:0};s.players.forEach((p:any)=>p.hand=p.pile.splice(0,5));return s;}
 export function act(s:any,who:number,a:any){
  if(s.rulesVersion!==2)throw Error('Rules updated. Start a new match.');
@@ -40,11 +43,11 @@ export function act(s:any,who:number,a:any){
  }else if(a.kind==='hide'){
  const c=p.board[a.index];if(!c)throw Error('Choose a chameleon.');if(c.hidden)c.hidden=false;else{pay(1);c.hidden=true;c.used=true;}
  }else if(a.kind==='harvest'){
- const c=p.board[a.index];if(!c||!canHarvest(c.id))throw Error('Only Sprout Scout and Mossback can generate mana.');if(c.used)throw Error('This camo already acted.');c.used=true;p.mana+=c.id===5?2:1;s.log.unshift(cards[c.id].name+' gathered mana.');
+ const c=p.board[a.index];if(!c||!canHarvest(c.id))throw Error('Only camos with Harvest can generate mana.');if(c.used)throw Error('This camo already acted.');c.used=true;p.mana+=c.id===5||c.id===17?2:1;s.log.unshift(cards[c.id].name+' gathered mana.');
  }else if(a.kind==='attack'){
  const c=p.board[a.index],t=e.board[a.target];if(!c||c.used||c.hidden)throw Error('This camo cannot attack.');if(!slot(a.target)||!t||t.hidden)throw Error('Choose a visible enemy camo.');c.used=true;const damage=Math.max(1,cards[c.id].attack+(p.land===8?1:0)-(e.land===9?1:0));t.hp-=damage;s.log.unshift(cards[c.id].name+' attacks '+cards[t.id].name+' for '+damage+'.');
  }else if(a.kind==='end'){
- s.turn=1-who;s.round++;e.mana=1;e.board.forEach((c:any)=>{if(c)c.used=false;});if(e.pile.length)e.hand.push(e.pile.shift());
+ if(!e.board.some((c:any)=>c&&!c.hidden)){p.souls+=3;s.log.unshift('No visible enemy camos: +3 souls.');}s.turn=1-who;s.round++;e.mana=1;e.board.forEach((c:any)=>{if(c){c.used=false;c.hidden=false;}});if(e.pile.length)e.hand.push(e.pile.shift());
  }else throw Error('Unknown action.');
  s.players.forEach((side:any,i:number)=>side.board.forEach((c:any,j:number)=>{if(c&&c.hp<=0){const cost=cards[c.id].cost;s.players[1-i].souls+=cost;side.board[j]=null;s.log.unshift(cards[c.id].name+' defeated: +'+cost+' souls.');}}));
  if(s.players[0].souls>=10)s.winner=0;else if(s.players[1].souls>=10)s.winner=1;s.log=s.log.slice(0,15);return s;

@@ -1,0 +1,14 @@
+﻿import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {stripTypeScriptTypes} from 'node:module';
+import {battle,act,starter} from '../app/game.ts';
+const source=stripTypeScriptTypes(readFileSync(new URL('../app/packs.ts',import.meta.url),'utf8')).replace("'./game'",JSON.stringify(new URL('../app/game.ts',import.meta.url).href));
+const {openPacks,chaseChance}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
+assert.equal(chaseChance(0),.001);assert.equal(chaseChance(1),.002);assert.equal(chaseChance(999),1);
+let p=starter();const d=openPacks(p,5,()=>.9);assert.equal(p.coins,350);assert.equal(d.pulls.length,25);assert.equal(p.chaseMisses,5);
+p.chaseMisses=20;const hit=openPacks(p,1,()=>0);assert.equal(hit.hits[0].id,18);assert.equal(p.chaseMisses,0);assert.equal(p.owned[18],1);
+let q=starter();assert.throws(()=>openPacks(q,0));assert.throws(()=>openPacks(q,51));assert.throws(()=>openPacks(q,50));assert.equal(q.coins,500);
+let s=battle(starter().deck,starter().deck);s.players[0].board[0]={id:0,hp:3,hidden:true,used:true};act(s,0,{kind:'end'});assert.equal(s.players[0].souls,3);assert.equal(s.players[0].board[0].hidden,true);act(s,1,{kind:'end'});assert.equal(s.players[1].souls,3);assert.equal(s.players[0].board[0].hidden,false);assert.equal(s.players[0].board[0].used,false);
+s=battle(starter().deck,starter().deck);s.players[1].board[0]={id:0,hp:3,hidden:false,used:false};act(s,0,{kind:'end'});assert.equal(s.players[0].souls,0);
+s=battle(starter().deck,starter().deck);s.players[0].souls=8;act(s,0,{kind:'end'});assert.equal(s.winner,0);assert.equal(s.players[0].souls,11);
+console.log('Passed: 30-coin bulk packs, purchase limits, persisted luck increments/reset/cap, chase ownership, turn-end 3 souls, hidden protection until owner turn, automatic reveal and bonus victory.');
