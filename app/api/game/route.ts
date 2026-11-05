@@ -13,7 +13,7 @@ function view(g:any,uid:string){const who=g.ids.indexOf(uid);if(who<0)throw Erro
 export async function POST(req:Request){try{if(req.headers.get('origin')&&req.headers.get('origin')!==new URL(req.url).origin)throw Error('Invalid origin.');const a:any=await req.json();if(['login','register','logout'].includes(a.kind))return await authenticate(req,a);const uid=await accountUser(req);if(!uid)return Response.json({error:'Sign in to play.'},{status:401});const key='user:'+uid;await insert(key,starter());let row=await read(key),p=JSON.parse(row.data);
  if(p.rulesVersion!==2){upgradeProfile(p);await write(key,p,row.version);row=await read(key);}
  if(!p.username){if(uid.startsWith('acct:')){const r=await db().prepare("SELECT data FROM records WHERE id LIKE 'account:%' AND json_extract(data,'$.uid')=? LIMIT 1").bind(uid).first<any>();p.username=r?JSON.parse(r.data).username:'Collector';}else p.username='Collector_'+uid.slice(-6);await write(key,p,row.version);row=await read(key);}
- if(p.characterExpansion!==1){grantWelcomeCards(p);await write(key,p,row.version);row=await read(key);}
+ if(p.characterExpansion!==2){grantWelcomeCards(p);await write(key,p,row.version);row=await read(key);}
  const beforeStyle=JSON.stringify(p);ensureCosmetics(p);if(beforeStyle!==JSON.stringify(p)){await write(key,p,row.version);row=await read(key);}
  if(a.kind==='buyCosmetic'||a.kind==='equipCosmetic'||a.kind==='editProfile'){if(a.kind==='buyCosmetic')buyCosmetic(p,a.id);else if(a.kind==='equipCosmetic')equipCosmetic(p,a.id);else editProfile(p,a);await write(key,p,row.version);return Response.json({profile:p});}
  const beforeQuests=JSON.stringify(p.quests);dailyQuests(p);if(beforeQuests!==JSON.stringify(p.quests)){await write(key,p,row.version);row=await read(key);}

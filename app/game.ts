@@ -29,16 +29,41 @@ export const cards = [
  ["Neil Armstrongue",5,5,7,"legendary","camo","Summon: draw a card. One giant lick for camokind.","#9eb7d6"],
  ["DJ Stickyfeet",3,2,5,"rare","camo","Summon: gain 2 mana. Dropping beats, not branches.","#b498d0"],
  ["Business Lizard",2,1,5,"uncommon","camo","Harvest: generate 2 mana. Let us circle back to flies.","#99aa83"]
+,
+ ["Nacho Average Camo",1,2,1,"common","camo","Crunch first. Ask questions later.","#ddae56"],
+ ["Detective Sticky",2,2,4,"uncommon","camo","Summon: draw a card. The plot thickens like sap.","#b59d7a"],
+ ["Camo-saurus Rex",4,5,5,"rare","camo","Tiny arms. Enormous tongue energy.","#7ba77b"],
+ ["Disco Gecko",3,3,4,"epic","camo","Summon: gain 1 mana. The branch is a dance floor.","#c78eb8"],
+ ["The Great Camo-dini",3,2,4,"epic","camo","Arrives hidden. Now you see a leaf.","#9479b4"],
+ ["Camo-copter",3,4,2,"rare","camo","Please keep your tongues inside the vehicle.","#82b3b0"],
+ ["Doughnut Disturb",1,1,4,"common","camo","Glazed, confused, and ready for battle.","#d7a0bd"],
+ ["Sergeant Slurp",3,3,5,"rare","camo","Summon: draw a card. Reporting for sticky duty.","#7396a0"],
+ ["Sushi Roll Model",2,2,3,"uncommon","camo","A very raw talent.","#87a888"],
+ ["Camo-sauna",2,1,5,"uncommon","camo","Harvest: generate 1 mana. Sweating the small bugs.","#adc1ae"],
+ ["Count Camo-cula",4,4,5,"epic","camo","Summon: draw a card. I vant to lick your flies.","#9b83b3"],
+ ["Camo-mber",5,4,8,"legendary","camo","Summon: heal all your camos by 2. The big cheese.","#e2c780"],
+ ["Postman Pat-a-Fly",1,1,2,"common","camo","Summon: draw a card. Special de-livery.","#8da4ba"],
+ ["Camo-nado",4,5,3,"epic","camo","Summon: gain 2 mana. A whirlwind of questionable plans.","#95b7ba"],
+ ["Grandpa Grip",3,2,7,"rare","camo","Harvest: generate 2 mana. Back in my branch...","#a3b28a"],
+ ["Bubble Trouble",1,1,3,"common","camo","Professional bubble inspector. Pop at your own risk.","#83c5c3"],
+ ["Professor Tonguestein",3,2,4,"rare","camo","Summon: draw 2 cards. A breakthrough in fly-ology.","#95ae9c"],
+ ["Pickle Rickshaw",2,3,3,"uncommon","camo","Meter running. Tongue also running.","#a1b75b"],
+ ["Camo of Duty",4,4,6,"rare","camo","Tactical branch secured.","#899b6a"],
+ ["Cloud Nine Camo",3,2,6,"epic","camo","Arrives hidden. Head firmly in the clouds.","#a5bcd3"],
+ ["Camo-mime",2,2,4,"uncommon","camo","Trapped in an invisible terrarium. Again.","#c4c9bc"],
+ ["Shell Yeah",1,1,4,"common","camo","A mobile home with excellent camouflage.","#95aa70"],
+ ["Lizard of Oz",5,4,7,"legendary","camo","Summon: draw 2 cards. Follow the yellow brick branch.","#82b79d"],
+ ["Camo-zilla",6,7,8,"legendary","camo","The city was not zoned for this much tongue.","#7d9b8c"]
 ].map((c,i)=>({id:i,name:c[0] as string,cost:c[1] as number,attack:c[2] as number,hp:c[3] as number,rarity:c[4] as string,type:c[5] as string,text:c[6] as string,color:c[7] as string}));
 
 export const starterDeck=()=>cards.filter(c=>c.id<16).flatMap(c=>Array(c.id<8?3:2).fill(c.id));
-export const botDeck=()=>{const d=starterDeck();[6,7,9,10,12,13,18,19,21,22,36].forEach((slot,i)=>d[slot]=19+i);return d;};
+export const botDeck=()=>{const d=starterDeck();[6,7,9,10,12,13,18,19,21,22,36].forEach((slot,i)=>d[slot]=[19,20,30,32,35,36,40,43,46,49,53][i]);return d;};
 export const starter=()=>({rulesVersion:2,coins:500,owned:Object.fromEntries(cards.filter(c=>c.id<16).map(c=>[c.id,3])),deck:starterDeck(),binder:[4,3,6,1,7,5],wins:0});
 export function upgradeProfile(p:any){if(p.rulesVersion!==2){cards.filter(c=>c.id<16).forEach(c=>p.owned[c.id]=Math.max(3,p.owned[c.id]||0));const next:number[]=[];for(const id of p.deck||[])if(cards[id]&&next.filter(x=>x===id).length<3)next.push(id);for(const id of starterDeck())if(next.length<40&&next.filter(x=>x===id).length<3)next.push(id);p.deck=next;p.rulesVersion=2;}return p;}
 export const shuffle=(a:any[])=>a.map(v=>({v,r:Math.random()})).sort((a,b)=>a.r-b.r).map(x=>x.v);
-export const canHarvest=(id:number)=>[0,5,16,17,25,29].includes(id);
-export const harvestAmount=(id:number)=>[5,17,29].includes(id)?2:1;
-export function grantWelcomeCards(p:any){if(p.characterExpansion!==1){for(const id of [19,20,26])p.owned[id]=Math.max(p.owned[id]||0,3);p.characterExpansion=1;}return p;}
+export const canHarvest=(id:number)=>[0,5,16,17,25,29,39,44].includes(id);
+export const harvestAmount=(id:number)=>[5,17,29,44].includes(id)?2:1;
+export function grantWelcomeCards(p:any){if(!p.characterExpansion){for(const id of [19,20,26])p.owned[id]=Math.max(p.owned[id]||0,3);}if(p.characterExpansion!==2){for(const id of [30,36,45,51])p.owned[id]=Math.max(p.owned[id]||0,3);p.characterExpansion=2;}return p;}
 export function battle(deck:number[],opponent:number[],bot=true){const side=(d:number[])=>({souls:0,mana:1,hand:[] as number[],pile:shuffle(d),board:Array(5).fill(null),land:-1});const s:any={rulesVersion:2,players:[side(deck),side(opponent)],turn:0,round:1,log:['First to 10 souls wins. Your turn!'],winner:null,bot,nextBotAt:0,statsDay:new Date().toISOString().slice(0,10),stats:[{summons:0,attacks:0,kills:0},{summons:0,attacks:0,kills:0}]};s.players.forEach((p:any)=>p.hand=p.pile.splice(0,5));return s;}
 export function act(s:any,who:number,a:any){
  if(s.rulesVersion!==2)throw Error('Rules updated. Start a new match.');
@@ -50,7 +75,7 @@ export function act(s:any,who:number,a:any){
  if(c.type==='camo'&&(!slot(square)||p.board[square]))throw Error('Choose an empty square.');
  if(id===11&&(!e.board[a.target]||e.board[a.target].hidden))throw Error('Choose a visible enemy first.');
  pay(c.cost);p.hand.splice(a.index,1);
- if(c.type==='camo'){s.stats[who].summons++;p.board[square]={id,hp:c.hp,hidden:id===3||id===22,used:false};if(id===4||id===28)p.mana+=2;if(id===24)p.mana+=1;if((id===6||id===27)&&p.pile.length)p.hand.push(p.pile.shift());if(id===23)p.hand.push(...p.pile.splice(0,2));}
+ if(c.type==='camo'){s.stats[who].summons++;p.board[square]={id,hp:c.hp,hidden:[3,22,34,49].includes(id),used:false};if([4,28,43].includes(id))p.mana+=2;if([24,33].includes(id))p.mana+=1;if([6,27,31,37,40,42].includes(id)&&p.pile.length)p.hand.push(p.pile.shift());if([23,46,52].includes(id))p.hand.push(...p.pile.splice(0,2));if(id===41)p.board.forEach((x:any)=>{if(x)x.hp=Math.min(cards[x.id].hp,x.hp+2);});}
  else if(c.type==='land')p.land=id;else if(id===10)p.mana+=3;else if(id===11)e.board[a.target].hp-=3;else if(id===12)p.board.forEach((x:any)=>{if(x)x.hp=Math.min(cards[x.id].hp,x.hp+3);});else if(id===13)p.hand.push(...p.pile.splice(0,2));s.log.unshift(c.name+' played.');
  }else if(a.kind==='move'){
  if(!slot(a.index)||!slot(a.slot)||!p.board[a.index]||p.board[a.slot])throw Error('Move to an empty square.');p.board[a.slot]=p.board[a.index];p.board[a.index]=null;
