@@ -54,6 +54,19 @@ export const cards = [
  ["Shell Yeah",1,1,4,"common","camo","A mobile home with excellent camouflage.","#95aa70"],
  ["Lizard of Oz",5,4,7,"legendary","camo","Summon: draw 2 cards. Follow the yellow brick branch.","#82b79d"],
  ["Camo-zilla",6,7,8,"legendary","camo","The city was not zoned for this much tongue.","#7d9b8c"]
+,
+ ["Origami Overlord",3,3,5,"epic","camo","Summon: draw a card. Paperwork has never been this dangerous.","#b6afd0"],
+ ["Espresso Patronum",3,2,4,"epic","camo","Summon: gain 2 mana. Fully caffeinated camouflage.","#b49b86"],
+ ["Velvet Vanisher",4,4,4,"epic","camo","Arrives hidden. A dramatic exit before the entrance.","#9a78b4"],
+ ["Sir Scales-a-Billion",5,4,7,"legendary","camo","Summon: gain 3 mana. Generational fly wealth.","#d7bf78"],
+ ["The Last Airbrancher",5,5,6,"legendary","camo","Summon: draw 2 cards. Master of all four leaf piles.","#9ec8bb"],
+ ["Professor Paradox",6,5,8,"legendary","camo","Summon: draw 2 cards. Early for tomorrow. Late for yesterday.","#9e9dc5"],
+ ["Holo Hat Camo",2,2,5,"hit","camo","Holographic edition. Too many hats. Just enough sparkle.","#cbb0d6"],
+ ["Chrome Camo Car",3,5,2,"hit","camo","Chrome edition. Shiny enough to ruin its camouflage.","#a9c8cf"],
+ ["Midnight Camo-dini",3,2,4,"superhit","camo","Arrives hidden. The midnight edition of a disappearing act.","#9083b9"],
+ ["Solar Camo-zilla",6,7,8,"superhit","camo","Solar edition. The forecast is mostly giant lizard.","#deb16c"],
+ ["Disco Inferno",5,5,7,"chase","camo","Summon: gain 2 mana. The dance floor is now a national park.","#dc9bbd"],
+ ["The Unlickable",6,7,8,"chase","camo","Summon: draw a card. A myth with impeccable tongue control.","#a6c5cb"]
 ].map((c,i)=>({id:i,name:c[0] as string,cost:c[1] as number,attack:c[2] as number,hp:c[3] as number,rarity:c[4] as string,type:c[5] as string,text:c[6] as string,color:c[7] as string}));
 
 export const starterDeck=()=>cards.filter(c=>c.id<16).flatMap(c=>Array(c.id<8?3:2).fill(c.id));
@@ -75,7 +88,7 @@ export function act(s:any,who:number,a:any){
  if(c.type==='camo'&&(!slot(square)||p.board[square]))throw Error('Choose an empty square.');
  if(id===11&&(!e.board[a.target]||e.board[a.target].hidden))throw Error('Choose a visible enemy first.');
  pay(c.cost);p.hand.splice(a.index,1);
- if(c.type==='camo'){s.stats[who].summons++;p.board[square]={id,hp:c.hp,hidden:[3,22,34,49].includes(id),used:false};if([4,28,43].includes(id))p.mana+=2;if([24,33].includes(id))p.mana+=1;if([6,27,31,37,40,42].includes(id)&&p.pile.length)p.hand.push(p.pile.shift());if([23,46,52].includes(id))p.hand.push(...p.pile.splice(0,2));if(id===41)p.board.forEach((x:any)=>{if(x)x.hp=Math.min(cards[x.id].hp,x.hp+2);});}
+ if(c.type==='camo'){s.stats[who].summons++;p.board[square]={id,hp:c.hp,hidden:[3,22,34,49,56,62].includes(id),used:false};if([4,28,43,55,64].includes(id))p.mana+=2;if(id===57)p.mana+=3;if([24,33].includes(id))p.mana+=1;if([6,27,31,37,40,42,54,65].includes(id)&&p.pile.length)p.hand.push(p.pile.shift());if([23,46,52,58,59].includes(id))p.hand.push(...p.pile.splice(0,2));if(id===41)p.board.forEach((x:any)=>{if(x)x.hp=Math.min(cards[x.id].hp,x.hp+2);});}
  else if(c.type==='land')p.land=id;else if(id===10)p.mana+=3;else if(id===11)e.board[a.target].hp-=3;else if(id===12)p.board.forEach((x:any)=>{if(x)x.hp=Math.min(cards[x.id].hp,x.hp+3);});else if(id===13)p.hand.push(...p.pile.splice(0,2));s.log.unshift(c.name+' played.');
  }else if(a.kind==='move'){
  if(!slot(a.index)||!slot(a.slot)||!p.board[a.index]||p.board[a.slot])throw Error('Move to an empty square.');p.board[a.slot]=p.board[a.index];p.board[a.index]=null;

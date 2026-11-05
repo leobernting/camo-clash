@@ -1,0 +1,14 @@
+﻿import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {stripTypeScriptTypes} from 'node:module';
+import {cards,starter,battle,act} from '../app/game.ts';
+const source=stripTypeScriptTypes(readFileSync(new URL('../app/packs.ts',import.meta.url),'utf8')).replace("'./game'",JSON.stringify(new URL('../app/game.ts',import.meta.url).href));const {openPacks,specialCards}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
+assert.equal(cards.length,66);assert.equal(cards.filter(c=>c.type==='camo').length,60);assert.equal(specialCards.length,9);for(const r of ['hit','superhit','chase'])assert.equal(cards.filter(c=>c.rarity===r).length,3);
+for(const card of cards.filter(c=>c.id>=54)){
+ const rolls=[];if(['hit','superhit','chase'].includes(card.rarity)){if(card.rarity==='chase')rolls.push(0);else if(card.rarity==='superhit')rolls.push(.9,0);else rolls.push(.9,.9,0);const pool=cards.filter(c=>c.rarity===card.rarity);rolls.push((pool.findIndex(c=>c.id===card.id)+.1)/pool.length);}else rolls.push(.9,.9,.9);
+ for(let slot=0;slot<7;slot++){if(slot===6&&['hit','superhit','chase'].includes(card.rarity))continue;const target=slot===6&&!['hit','superhit','chase'].includes(card.rarity),rarity=target?card.rarity:slot===6?'rare':'common';const pool=cards.filter(c=>!specialCards.includes(c.id)&&c.rarity===rarity);rolls.push(target?(rarity==='legendary'?.01:.2):slot===6?.9:.1,target?(pool.findIndex(c=>c.id===card.id)+.1)/pool.length:.5);}
+ const p=starter();p.chaseMisses=0;const result=openPacks(p,1,()=>rolls.shift());assert.equal(result.pulls.length,7);assert.ok(result.pulls.includes(card.id),'Card missing: '+card.name);assert.equal(p.owned[card.id],1);assert.equal(result.pulls[6],card.id);if(card.rarity==='chase')assert.equal(p.chaseMisses,0);else assert.equal(p.chaseMisses,1);
+}
+for(const [id,draw,gain,hidden] of [[54,1,0,false],[55,0,2,false],[56,0,0,true],[57,0,3,false],[58,2,0,false],[59,2,0,false],[60,0,0,false],[61,0,0,false],[62,0,0,true],[63,0,0,false],[64,0,2,false],[65,1,0,false]]){const s=battle(starter().deck,starter().deck);s.players[0].hand=[id];s.players[0].mana=20;act(s,0,{kind:'play',index:0,slot:4});assert.equal(s.players[0].board[4].id,id);assert.equal(s.players[0].board[4].hidden,hidden);assert.equal(s.players[0].hand.length,draw);assert.equal(s.players[0].mana,20-cards[id].cost+gain);}
+assert.ok(!readFileSync(new URL('../app/card-art.tsx',import.meta.url),'utf8').includes('<image'));
+console.log('Passed: 12 new high-rarity cards, three choices per special tier, every new pull obtainable with the rarest last, unchanged rarity-roll thresholds and chase-luck resets, plus every new summon ability.');
