@@ -1,7 +1,8 @@
 'use client';
 import {useState,useEffect} from 'react';
 import {cards,canHarvest} from './game';
-export default function Battle({m,busy,action,leave,start,Card,Camo}:any){
+import QuestBoard from './quest-board';
+export default function Battle({m,busy,action,leave,start,Card,Camo,profile,api}:any){
  const [selected,S]=useState(-1),[target,T]=useState(-1),[hand,H]=useState(-1),[over,O]=useState(-1);
  const me=m.players[m.who],enemy=m.players[1-m.who],myTurn=m.turn===m.who&&m.winner===null&&!busy;
  useEffect(()=>{S(-1);T(-1);H(-1);},[m.round,m.room]);
@@ -11,7 +12,7 @@ export default function Battle({m,busy,action,leave,start,Card,Camo}:any){
  const drop=(e:any,slot:number)=>{e.preventDefault();O(-1);if(!myTurn||me.board[slot])return;try{const d=JSON.parse(e.dataTransfer.getData('application/x-camo'));if(d.room!==m.room)return;if(d.kind==='hand'&&cards[me.hand[d.index]]?.type==='camo')play(d.index,slot);else if(d.kind==='board'){action({kind:'move',index:d.index,slot});S(-1);}}catch{}};
  const drag=(e:any,kind:string,index:number)=>{e.dataTransfer.setData('application/x-camo',JSON.stringify({kind,index,room:m.room}));e.dataTransfer.effectAllowed='move';};
  return <><div className="title"><div><div className="eyebrow">{m.bot?'BOT BATTLE':'PLAYER CHALLENGE'} · TURN {m.round}</div><h1>Battle in the canopy</h1></div><button className="secondary" onClick={leave}>Leave arena</button></div>
- <div className="soulsboard"><div><small>{m.bot?'Moss, the trailkeeper':'Rival collector'}</small><b>✦ {enemy.souls} / 10 souls</b><progress max="10" value={enemy.souls}/></div><span>FIRST TO 10 SOULS</span><div><small>Your collection of souls</small><b>✦ {me.souls} / 10 souls</b><progress max="10" value={me.souls}/></div></div>
+ <QuestBoard compact profile={profile} api={api}/><div className="soulsboard"><div><small>{m.bot?'Moss, the trailkeeper':'Rival collector'}</small><b>✦ {enemy.souls} / 10 souls</b><progress max="10" value={enemy.souls}/></div><span>FIRST TO 10 SOULS</span><div><small>Your collection of souls</small><b>✦ {me.souls} / 10 souls</b><progress max="10" value={me.souls}/></div></div>
  <div className="leader"><b>Opponent’s canopy</b><small>{enemy.land>=0?cards[enemy.land].name:'No land active'} · {enemy.hand.length} cards in hand</small></div>
  <div className="board">{Array.from({length:5},(_,i)=>{const c=enemy.board[i];return <button key={i} disabled={!myTurn||!c||c.hidden} className={'slot '+(target===i?'chosen':'')} onClick={()=>T(i)} aria-pressed={target===i}>{c?<><Camo color={cards[c.id].color}/><b>{cards[c.id].name}</b><small>{c.hidden?'Hidden · Untargetable':`⚔ ${cards[c.id].attack} · ♥ ${c.hp}`}</small><span className="soulvalue">✦ {cards[c.id].cost} souls on defeat</span></>:<small>Empty square</small>}</button>;})}</div>
  <div className="turnbar"><b>{m.winner!==null?'MATCH COMPLETE':m.turn===m.who?'YOUR TURN':'MOSS IS THINKING…'} · ◆ {me.mana} mana</b><span>{me.land>=0?cards[me.land].name:'No land active'}</span><button className="primary" disabled={!myTurn} onClick={()=>{H(-1);S(-1);action({kind:'end'});}}>End turn →</button></div>

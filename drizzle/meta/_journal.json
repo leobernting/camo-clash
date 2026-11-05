@@ -15,6 +15,13 @@
       "when": 1793900320070,
       "tag": "0001_mushy_sphinx",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793901583180,
+      "tag": "0002_dusty_mandroid",
+      "breakpoints": true
     }
   ]
 }
