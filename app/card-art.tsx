@@ -1,0 +1,2 @@
+import {cards} from './game';
+export default function CardArt({id,className=''}:{id:number,className?:string}){return <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" className={'cardillustration '+className} role="img" aria-label={cards[id]?.name||'Chameleon illustration'}><image href="/art/camo-atlas-v1.webp" x={-(id%6)*100} y={-Math.floor(id/6)*100} width="600" height="500" preserveAspectRatio="none"/></svg>;}

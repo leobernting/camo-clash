@@ -1,30 +1,44 @@
 export const cards = [
  ['Sprout Scout',1,1,3,'common','camo','Harvest: generate 1 mana.','#87c957'],
- ['Ember Crest',2,3,2,'rare','camo','Fierce little flame. Attacks immediately.','#ed8e50'],
- ['Dewdrop',1,1,4,'uncommon','camo','A patient guardian of the canopy.','#57bfc0'],
- ['Moonveil',3,3,5,'epic','camo','Arrives hidden. Reveal for free.','#ad8ce4'],
- ['Golden Panther',4,5,5,'legendary','camo','Summon: gain 2 mana.','#e3bf64'],
- ['Mossback',2,2,6,'rare','camo','Harvest: generate 2 mana.','#63a67a'],
- ['Orchid Stalker',3,4,3,'epic','camo','Summon: draw a card.','#dc89bd'],
- ['Azure Runner',2,3,3,'rare','camo','Born for the first strike.','#70a3db'],
+ ['Toast Malone',2,3,2,'rare','camo','Fierce little flame. Attacks immediately.','#ed8e50'],
+ ['Sir Drips-a-Lot',1,1,4,'uncommon','camo','A patient guardian of the canopy.','#57bfc0'],
+ ['Moonveil Sneak',3,3,5,'epic','camo','Arrives hidden. Reveal for free.','#ad8ce4'],
+ ['King Bling',4,5,5,'legendary','camo','Summon: gain 2 mana.','#e3bf64'],
+ ['Moss Boss',2,2,6,'rare','camo','Harvest: generate 2 mana.','#63a67a'],
+ ['Petal Peeper',3,4,3,'epic','camo','Summon: draw a card.','#dc89bd'],
+ ['Zoomie McScales',2,3,3,'rare','camo','Born for the first strike.','#70a3db'],
  ['Sunlit Canopy',2,0,0,'rare','land','Your attacks deal +1 damage.','#b5ca6d'],
- ['Thorn Marsh',2,0,0,'rare','land','Enemy attacks deal 1 less damage (minimum 1).','#7c9d86'],
+ ['The Prickle Puddle',2,0,0,'rare','land','Enemy attacks deal 1 less damage (minimum 1).','#7c9d86'],
  ['Wild Growth',1,0,0,'common','spell','Gain 3 mana.','#94c761'],
  ['Tongue Lash',2,0,0,'rare','spell','Deal 3 damage to a visible enemy.','#e4a66d'],
  ['Morning Dew',1,0,0,'uncommon','spell','Restore 3 health to all your camos.','#7ac9ce'],
- ['Shed Skin',1,0,0,'uncommon','spell','Draw 2 cards.','#caadce'],
- ['Crimson King',5,6,7,'legendary','camo','The crown of the rainforest.','#df727b'],
- ['Fern Hatchling',1,2,2,'uncommon','camo','Small scales. Big ambitions.','#b1cc6a'],
- ['Prism Scout',1,1,3,'hit','camo','Prismatic edition ? 1 in 100 hit. Harvest: 1 mana.','#71d6ce'],
- ['Eclipse Mossback',2,2,6,'superhit','camo','Eclipse edition ? 1 in 200 hit. Harvest: 2 mana.','#9e8bdb'],
- ['Aurora Sovereign',5,6,7,'chase','camo','Chase edition ? a living aurora.','#f6a3db']
+ ['New Skin, Who Dis?',1,0,0,'uncommon','spell','Draw 2 cards.','#caadce'],
+ ['His Royal Redness',5,6,7,'legendary','camo','The crown of the rainforest.','#df727b'],
+ ['Pocket Pickle',1,2,2,'uncommon','camo','Small scales. Big ambitions.','#b1cc6a'],
+ ['Prism Scout',1,1,3,'hit','camo','Prismatic edition - 1 in 100 hit. Harvest: 1 mana.','#71d6ce'],
+ ['Eclipse Moss Boss',2,2,6,'superhit','camo','Eclipse edition - 1 in 200 hit. Harvest: 2 mana.','#9e8bdb'],
+ ['Aurora Sovereign',5,6,7,'chase','camo','Chase edition - a living aurora.','#f6a3db'],
+ ["Hat Camo",2,2,5,"uncommon","camo","All dressed up. Nowhere to hide.","#78ad7a"],
+ ["Camo Car",3,5,2,"rare","camo","Zero to sticky in three seconds.","#8bb845"],
+ ["Sir Licks-a-Lot",3,4,5,"rare","camo","A noble tongue with questionable table manners.","#c3b59a"],
+ ["Camo-flage",2,2,3,"epic","camo","Arrives hidden. Definitely not a suspicious leaf.","#6b9c74"],
+ ["Gandalf the Green",4,3,5,"epic","camo","Summon: draw 2 cards. You shall not pass this branch.","#a286d1"],
+ ["Captain Camo",3,3,4,"rare","camo","Summon: gain 1 mana. A pirate of the pond.","#c4a067"],
+ ["Chef Kiss",2,1,4,"uncommon","camo","Harvest: generate 1 mana. A five-star fly menu.","#d6b992"],
+ ["Banana Bandit",1,1,3,"common","camo","Wanted for crimes against fruit bowls.","#e2cc5b"],
+ ["Neil Armstrongue",5,5,7,"legendary","camo","Summon: draw a card. One giant lick for camokind.","#9eb7d6"],
+ ["DJ Stickyfeet",3,2,5,"rare","camo","Summon: gain 2 mana. Dropping beats, not branches.","#b498d0"],
+ ["Business Lizard",2,1,5,"uncommon","camo","Harvest: generate 2 mana. Let us circle back to flies.","#99aa83"]
 ].map((c,i)=>({id:i,name:c[0] as string,cost:c[1] as number,attack:c[2] as number,hp:c[3] as number,rarity:c[4] as string,type:c[5] as string,text:c[6] as string,color:c[7] as string}));
 
 export const starterDeck=()=>cards.filter(c=>c.id<16).flatMap(c=>Array(c.id<8?3:2).fill(c.id));
+export const botDeck=()=>{const d=starterDeck();[6,7,9,10,12,13,18,19,21,22,36].forEach((slot,i)=>d[slot]=19+i);return d;};
 export const starter=()=>({rulesVersion:2,coins:500,owned:Object.fromEntries(cards.filter(c=>c.id<16).map(c=>[c.id,3])),deck:starterDeck(),binder:[4,3,6,1,7,5],wins:0});
 export function upgradeProfile(p:any){if(p.rulesVersion!==2){cards.filter(c=>c.id<16).forEach(c=>p.owned[c.id]=Math.max(3,p.owned[c.id]||0));const next:number[]=[];for(const id of p.deck||[])if(cards[id]&&next.filter(x=>x===id).length<3)next.push(id);for(const id of starterDeck())if(next.length<40&&next.filter(x=>x===id).length<3)next.push(id);p.deck=next;p.rulesVersion=2;}return p;}
 export const shuffle=(a:any[])=>a.map(v=>({v,r:Math.random()})).sort((a,b)=>a.r-b.r).map(x=>x.v);
-export const canHarvest=(id:number)=>id===0||id===5||id===16||id===17;
+export const canHarvest=(id:number)=>[0,5,16,17,25,29].includes(id);
+export const harvestAmount=(id:number)=>[5,17,29].includes(id)?2:1;
+export function grantWelcomeCards(p:any){if(p.characterExpansion!==1){for(const id of [19,20,26])p.owned[id]=Math.max(p.owned[id]||0,3);p.characterExpansion=1;}return p;}
 export function battle(deck:number[],opponent:number[],bot=true){const side=(d:number[])=>({souls:0,mana:1,hand:[] as number[],pile:shuffle(d),board:Array(5).fill(null),land:-1});const s:any={rulesVersion:2,players:[side(deck),side(opponent)],turn:0,round:1,log:['First to 10 souls wins. Your turn!'],winner:null,bot,nextBotAt:0,statsDay:new Date().toISOString().slice(0,10),stats:[{summons:0,attacks:0,kills:0},{summons:0,attacks:0,kills:0}]};s.players.forEach((p:any)=>p.hand=p.pile.splice(0,5));return s;}
 export function act(s:any,who:number,a:any){
  if(s.rulesVersion!==2)throw Error('Rules updated. Start a new match.');
@@ -36,14 +50,14 @@ export function act(s:any,who:number,a:any){
  if(c.type==='camo'&&(!slot(square)||p.board[square]))throw Error('Choose an empty square.');
  if(id===11&&(!e.board[a.target]||e.board[a.target].hidden))throw Error('Choose a visible enemy first.');
  pay(c.cost);p.hand.splice(a.index,1);
- if(c.type==='camo'){s.stats[who].summons++;p.board[square]={id,hp:c.hp,hidden:id===3,used:false};if(id===4)p.mana+=2;if(id===6&&p.pile.length)p.hand.push(p.pile.shift());}
+ if(c.type==='camo'){s.stats[who].summons++;p.board[square]={id,hp:c.hp,hidden:id===3||id===22,used:false};if(id===4||id===28)p.mana+=2;if(id===24)p.mana+=1;if((id===6||id===27)&&p.pile.length)p.hand.push(p.pile.shift());if(id===23)p.hand.push(...p.pile.splice(0,2));}
  else if(c.type==='land')p.land=id;else if(id===10)p.mana+=3;else if(id===11)e.board[a.target].hp-=3;else if(id===12)p.board.forEach((x:any)=>{if(x)x.hp=Math.min(cards[x.id].hp,x.hp+3);});else if(id===13)p.hand.push(...p.pile.splice(0,2));s.log.unshift(c.name+' played.');
  }else if(a.kind==='move'){
  if(!slot(a.index)||!slot(a.slot)||!p.board[a.index]||p.board[a.slot])throw Error('Move to an empty square.');p.board[a.slot]=p.board[a.index];p.board[a.index]=null;
  }else if(a.kind==='hide'){
  const c=p.board[a.index];if(!c)throw Error('Choose a chameleon.');if(c.hidden)c.hidden=false;else{pay(1);c.hidden=true;c.used=true;}
  }else if(a.kind==='harvest'){
- const c=p.board[a.index];if(!c||!canHarvest(c.id))throw Error('Only camos with Harvest can generate mana.');if(c.used)throw Error('This camo already acted.');c.used=true;p.mana+=c.id===5||c.id===17?2:1;s.log.unshift(cards[c.id].name+' gathered mana.');
+ const c=p.board[a.index];if(!c||!canHarvest(c.id))throw Error('Only camos with Harvest can generate mana.');if(c.used)throw Error('This camo already acted.');c.used=true;p.mana+=harvestAmount(c.id);s.log.unshift(cards[c.id].name+' gathered mana.');
  }else if(a.kind==='attack'){
  const c=p.board[a.index],t=e.board[a.target];if(!c||c.used||c.hidden)throw Error('This camo cannot attack.');if(!slot(a.target)||!t||t.hidden)throw Error('Choose a visible enemy camo.');c.used=true;s.stats[who].attacks++;const damage=Math.max(1,cards[c.id].attack+(p.land===8?1:0)-(e.land===9?1:0));t.hp-=damage;s.log.unshift(cards[c.id].name+' attacks '+cards[t.id].name+' for '+damage+'.');
  }else if(a.kind==='end'){
