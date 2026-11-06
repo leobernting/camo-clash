@@ -8,7 +8,7 @@ const fresh=()=>{const s=battle([],[],false);s.players.forEach(p=>p.board[4]=uni
 const put=(s,id,i=0)=>s.players[0].board[i]=unit(id);
 const cycle=s=>{act(s,0,{kind:'end'});act(s,1,{kind:'end'});};
 const harvest=(s,i=0)=>act(s,0,{kind:'harvest',index:i});
-assert.equal(cards.length,128);assert.equal(cards.filter(c=>c.type==='camo').length,121);
+assert.equal(cards.length,129);assert.equal(cards.filter(c=>c.type==='camo').length,122);
 let s=fresh();assert.equal(s.players[0].mana,1);assert.equal(s.players[1].mana,0);act(s,0,{kind:'end'});assert.equal(s.players[1].mana,1,'each player gets one mana on their first active turn');act(s,1,{kind:'end'});assert.equal(s.players[0].mana,2);s.players[0].mana=7;s.players[1].mana=4;act(s,0,{kind:'end'});assert.equal(s.players[0].mana,7);assert.equal(s.players[1].mana,5);act(s,1,{kind:'end'});assert.equal(s.players[0].mana,8);assert.equal(s.players[1].mana,5);cycle(s);assert.equal(s.players[0].mana,9);assert.equal(s.players[1].mana,6);
 s=fresh();put(s,117);harvest(s);assert.equal(s.players[0].mana,4);assert.throws(()=>harvest(s),/already acted/);assert.equal(canAttack(s,0,0),false);cycle(s);assert.equal(s.players[0].mana,5);harvest(s);assert.equal(s.players[0].mana,8);s.players[0].hand=[1];act(s,0,{kind:'play',index:0,slot:1});assert.equal(s.players[0].mana,6);cycle(s);assert.equal(s.players[0].mana,7,'spent mana stays spent, leftovers persist');
 for(const [id,amount] of [[116,1],[117,3],[122,2],[123,1]]){s=fresh();put(s,id);const hidden=s.players[0].board[0].hidden;harvest(s);assert.equal(s.players[0].mana,1+amount);assert.equal(s.players[0].board[0].hidden,hidden);assert.throws(()=>harvest(s));cycle(s);assert.equal(s.players[0].mana,2+amount+(id===123?1:0));assert.equal(s.players[0].board[0].used,false);}

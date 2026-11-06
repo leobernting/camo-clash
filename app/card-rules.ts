@@ -1,11 +1,14 @@
 export const tribes=['Canopy','Gourmet','Trickster','Clockwork','Showtime'] as const;
+export const rarityOrder=['common','uncommon','rare','epic','legendary','hit','superhit','hyper','chase','gold'];
+export const rarityNames:Record<string,string>={common:'Common',uncommon:'Uncommon',rare:'Rare',epic:'Epic',legendary:'Legendary',hit:'Hit',superhit:'Super-hit',hyper:'Hyper Rare',chase:'Chase',gold:'Gold'};
+export const rarityLabel=(rarity:string)=>rarityNames[rarity]||rarity;
 export const cardSets=[
  {id:'core',name:'Into the Wild',color:'#8da975',description:'The original canopy collection.',combo:[0,6,32],guide:'Harvest with Sprout Scout, draw with Petal Peeper, then boost your Canopy attackers with Camo-saurus Rex.'},
  {id:'junction',name:'Jungle Junction',color:'#89ac83',description:'All aboard the Harvest express.',combo:[86,88,92],guide:'Sapling Signalman harvests mana. Ticket Taker turns your first Harvest into a card, while Locomoss grows your Junction crew.'},
  {id:'masquerade',name:'Midnight Masquerade',color:'#ab96c0',description:'Hide, reveal, steal the spotlight.',combo:[94,96,101],guide:'Hide Masked Munchkin, then reveal it next turn. Velvet Usher draws a card and The Great Hiss-dini gives your Masquerade crew an attack burst.'},
  {id:'snack',name:'Snack Attack',color:'#d0a47b',description:'A little healing. A very big appetite.',combo:[102,104,109],guide:'Biscuit Bandage heals your Snack crew each turn. Soup-er Visor rewards an actual heal with a card, and Queen of Tarts turns healing into permanent attack.'}
 ];
-export type CardRule={set?:string;harvestDraw?:number;harvestGrowGroup?:string;revealDraw?:number;revealMana?:number;revealAttackGroup?:string;healDraw?:number;healAttackGroup?:string;passive?:boolean;cost?:number;attack?:number;hp?:number;text:string;tribe?:string;tags?:string[];harvest?:number;harvestBonus?:number;harvestCondition?:string;harvestHealSelf?:number;summonDraw?:number;summonMana?:number;startsHidden?:boolean;armor?:number;startDraw?:number;drawCondition?:string;startHeal?:string;startHealAmount?:number;startMana?:number;startManaCondition?:string;auraAttack?:number;auraAttackGroup?:string;auraArmor?:number;auraArmorGroup?:string};
+export type CardRule={mixedOnly?:boolean;set?:string;harvestDraw?:number;harvestGrowGroup?:string;revealDraw?:number;revealMana?:number;revealAttackGroup?:string;healDraw?:number;healAttackGroup?:string;passive?:boolean;cost?:number;attack?:number;hp?:number;text:string;tribe?:string;tags?:string[];harvest?:number;harvestBonus?:number;harvestCondition?:string;harvestHealSelf?:number;summonDraw?:number;summonMana?:number;startsHidden?:boolean;armor?:number;startDraw?:number;drawCondition?:string;startHeal?:string;startHealAmount?:number;startMana?:number;startManaCondition?:string;auraAttack?:number;auraAttackGroup?:string;auraArmor?:number;auraArmorGroup?:string};
 export const cardRules:Record<number,CardRule>={
  0:{attack:1,hp:2,tribe:'Canopy',harvest:1,text:'Harvest 1: use your action to gain 1 mana.'},
  1:{attack:3,hp:2,tribe:'Gourmet',text:'The first other Gourmet you summon each turn gives Toast +1 attack permanently.'},
@@ -134,5 +137,6 @@ export const cardRules:Record<number,CardRule>={
  124:{set:'masquerade',tribe:'Trickster',tags:['Masquerade'],startsHidden:true,passive:true,startMana:1,startManaCondition:'hidden',text:'Masquerade. Arrives hidden. Start of your turn: gain 1 extra mana if this was hidden. It still reveals as usual.'},
  125:{set:'snack',tribe:'Gourmet',tags:['Snack'],harvest:1,harvestHealSelf:1,text:'Snack. Harvest 1 and heal this camo by 1. Healing a damaged camo triggers your healing combos.'},
  126:{set:'snack',tribe:'Gourmet',tags:['Snack'],harvest:1,harvestBonus:1,harvestCondition:'Gourmet',text:'Snack. Harvest 1, or Harvest 2 while you have another friendly Gourmet.'},
- 127:{set:'snack',tribe:'Gourmet',tags:['Snack'],passive:true,startMana:2,startManaCondition:'Gourmet',text:'Snack. Start of your turn: gain 2 extra mana if you have another friendly Gourmet. This does not use your action.'}
+ 127:{set:'snack',tribe:'Gourmet',tags:['Snack'],passive:true,startMana:2,startManaCondition:'Gourmet',text:'Snack. Start of your turn: gain 2 extra mana if you have another friendly Gourmet. This does not use your action.'},
+ 128:{set:'core',mixedOnly:true,tribe:'Showtime',tags:['Mixed Canopy Exclusive'],passive:true,startDraw:1,startMana:1,startManaCondition:'always',text:'Mixed Canopy exclusive. Start of your turn: draw an extra card and gain 1 extra mana.'}
 };

@@ -1,6 +1,6 @@
 import {camoOutline,drawingScore} from './drawing-rules.ts';
 import {cardRules} from './card-rules.ts';
-export {cardSets} from './card-rules.ts';
+export {cardSets,rarityLabel,rarityOrder} from './card-rules.ts';
 export const cards = [
  ['Sprout Scout',1,1,3,'common','camo','Harvest: generate 1 mana.','#87c957'],
  ['Toast Malone',2,3,2,'rare','camo','Fierce little flame. Attacks immediately.','#ed8e50'],
@@ -20,7 +20,7 @@ export const cards = [
  ['Pocket Pickle',1,2,2,'uncommon','camo','Small scales. Big ambitions.','#b1cc6a'],
  ['Jellybean Juggler',1,1,3,'hit','camo','Harvest: generate 1 mana. A balanced diet of airborne candy.','#d2a1bf'],
  ['Clockwork Chomp',2,2,6,'superhit','camo','Harvest: generate 2 mana. Wind up the jaws of productivity.','#c69d67'],
- ['Aurora Sovereign',5,6,7,'chase','camo','Chase edition - a living aurora.','#f6a3db'],
+ ['Aurora Sovereign',5,6,7,'hyper','camo','Chase edition - a living aurora.','#f6a3db'],
  ["Hat Camo",2,2,5,"uncommon","camo","All dressed up. Nowhere to hide.","#78ad7a"],
  ["Camo Car",3,5,2,"rare","camo","Zero to sticky in three seconds.","#8bb845"],
  ["Sir Licks-a-Lot",3,4,5,"rare","camo","A noble tongue with questionable table manners.","#c3b59a"],
@@ -68,8 +68,8 @@ export const cards = [
  ["Mantis Maestro",3,5,2,"hit","camo","Every battle deserves a dramatic violin solo.","#8fb788"],
  ["Deep-Sea Sneaker",3,2,4,"superhit","camo","Arrives hidden. The ocean floor has a new secret.","#668caa"],
  ["Thunderbranch Titan",6,7,8,"superhit","camo","A walking thunderstorm with excellent branch manners.","#8d9fbc"],
- ["Disco Inferno",5,5,7,"chase","camo","Summon: gain 2 mana. The dance floor is now a national park.","#dc9bbd"],
- ["The Unlickable",6,7,8,"chase","camo","Summon: draw a card. A myth with impeccable tongue control.","#a6c5cb"]
+ ["Disco Inferno",5,5,7,"hyper","camo","Summon: gain 2 mana. The dance floor is now a national park.","#dc9bbd"],
+ ["The Unlickable",6,7,8,"hyper","camo","Summon: draw a card. A myth with impeccable tongue control.","#a6c5cb"]
 ,
  ["Fern Accountant",3,1,4,"rare","camo","","#a7be84"],
  ["Pesto Protector",3,2,5,"rare","camo","","#85ac79"],
@@ -117,10 +117,10 @@ export const cards = [
 ["Queen of Tarts",5,2,7,"superhit","camo","","#d0a47b"],
 ["Branch Switcheroo",3,0,0,"rare","spell","","#bca3ca"],
 ["Pablo Picamasso",4,1,5,"epic","camo","","#d0b38c"],
-["The First Chameleon",5,3,6,"hyper","camo","","#a7c8b6"],
-["Infinity Express",5,3,6,"hyper","camo","","#a7b9cf"],
-["The Final Curtain",5,4,5,"hyper","camo","","#ba9ec8"],
-["The Cosmic Croissant",5,3,7,"hyper","camo","","#d5b595"],
+["The First Chameleon",5,3,6,"chase","camo","","#a7c8b6"],
+["Infinity Express",5,3,6,"chase","camo","","#a7b9cf"],
+["The Final Curtain",5,4,5,"chase","camo","","#ba9ec8"],
+["The Cosmic Croissant",5,3,7,"chase","camo","","#d5b595"],
 ["Solar Panel Camo",1,0,2,"common","camo","","#bad18d"],
 ["Dynamo-saur",3,0,5,"rare","camo","","#b9bc7d"],
 ["Raincheck Rex",3,1,4,"uncommon","camo","","#8dbbb1"],
@@ -132,7 +132,8 @@ export const cards = [
 ["Night Shift Camo",3,1,4,"rare","camo","","#8e98b5"],
 ["Smoothie Operator",2,0,4,"common","camo","","#d3b39b"],
 ["Sourdough Starter",3,1,5,"uncommon","camo","","#ceb98f"],
-["Piggy Pudding",4,0,6,"rare","camo","","#c6a2a0"]
+["Piggy Pudding",4,0,6,"rare","camo","","#c6a2a0"],
+["Midas McScales",5,3,6,"gold","camo","","#dfc06c"]
 ].map((c,i)=>({id:i,name:c[0] as string,cost:c[1] as number,attack:c[2] as number,hp:c[3] as number,rarity:c[4] as string,type:c[5] as string,color:c[7] as string,...cardRules[i],set:cardRules[i]?.set||'core',tags:[...(cardRules[i]?.tags||[]),...(cardRules[i]?.harvest||cardRules[i]?.startMana?['Generator']:[])]}));
 
 export const starterDeck=()=>cards.filter(c=>c.id<16).flatMap(c=>Array(c.id<8?3:2).fill(c.id));

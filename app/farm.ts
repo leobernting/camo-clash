@@ -1,9 +1,13 @@
 import {cards} from './game.ts';
 export const FOOD_PRICE=10,BREED_FOOD=5,BREED_TIME=60_000,FARM_PENS=6;
-export function ensureFarm(p:any){p.farm ||= {food:0,pens:Array(FARM_PENS).fill(null)};return p.farm;}
+export function ensureFarm(p:any,now=Date.now()){
+ p.farm ||= {food:0,pens:Array(FARM_PENS).fill(null)};
+ p.farm.pens=p.farm.pens.map((pen:any)=>pen?.kind==='egg'&&pen.readyAt<=now?{kind:'camo',id:pen.id,placedAt:pen.readyAt,busyUntil:0,restoreDeck:false,born:true}:pen);
+ return p.farm;
+}
 export function validDeck(p:any,deck=p.deck){return Array.isArray(deck)&&deck.length===40&&deck.every((id:number)=>Number.isInteger(id)&&cards[id]&&deck.filter((n:number)=>n===id).length<=Math.min(3,p.owned?.[id]||0));}
 export function farmAction(p:any,a:any,now=Date.now(),random:()=>number=Math.random){
- const farm=ensureFarm(p),slot=(n:any)=>Number.isInteger(n)&&n>=0&&n<FARM_PENS;
+ const farm=ensureFarm(p,now),slot=(n:any)=>Number.isInteger(n)&&n>=0&&n<FARM_PENS;
  if(a.kind==='farmFood'){
   if(!Number.isInteger(a.count)||a.count<1||a.count>100)throw Error('Choose 1 to 100 food.');
   if(p.coins<a.count*FOOD_PRICE)throw Error('Not enough coins for food.');p.coins-=a.count*FOOD_PRICE;farm.food+=a.count;return {message:'Food added to your pantry.'};
@@ -19,9 +23,7 @@ export function farmAction(p:any,a:any,now=Date.now(),random:()=>number=Math.ran
  }
  if(a.kind==='farmPickup'){
   if(!slot(a.slot)||!farm.pens[a.slot])throw Error('Choose an occupied pen.');const pen=farm.pens[a.slot];
-  if(pen.kind==='egg'){
-   if(now<pen.readyAt)throw Error('Your egg is still hatching.');p.owned[pen.id]=(p.owned[pen.id]||0)+1;farm.pens[a.slot]=null;return {message:cards[pen.id].name+' hatched! Its card is in your collection.',hatched:pen.id};
-  }
+  if(pen.kind==='egg')throw Error('Your egg is still hatching.');
   if(now<pen.busyUntil)throw Error('This parent is caring for an egg. Pick it up after the hatch timer ends.');
   p.owned[pen.id]=(p.owned[pen.id]||0)+1;
   if(pen.restoreDeck&&p.deck.length<40&&p.deck.filter((id:number)=>id===pen.id).length<Math.min(3,p.owned[pen.id]))p.deck.push(pen.id);

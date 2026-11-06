@@ -1,9 +1,8 @@
 'use client';
 import {useState} from 'react';
 import {cards} from './game';
-import {tribes,cardSets} from './card-rules';
-const rarities=['common','uncommon','rare','epic','legendary','hit','superhit','chase','hyper'];
-const rarityNames:Record<string,string>={common:'Common',uncommon:'Uncommon',rare:'Rare',epic:'Epic',legendary:'Legendary',hit:'Hit',superhit:'Super-hit',chase:'Chase',hyper:'Hyper Rare'};
+import {tribes,cardSets,rarityOrder,rarityNames} from './card-rules';
+const rarities=rarityOrder;
 export default function CardIndex({profile,Card}:any){const [setId,SetId]=useState('all'),[search,S]=useState(''),[type,T]=useState('all'),[rarity,R]=useState('all'),[ownership,O]=useState('all'),[sort,B]=useState('number'),[tribeFilter,F]=useState('all');
  const owned=cards.filter(c=>(profile?.owned?.[c.id]||0)>0).length;
  const results=cards.filter(c=>(setId==='all'||c.set===setId)&&(c.name+' '+c.text+' '+c.tribe+' '+c.tags.join(' ')).toLowerCase().includes(search.toLowerCase())&&(tribeFilter==='all'||c.tribe===tribeFilter||c.tags.includes(tribeFilter))&&(type==='all'||c.type===type)&&(rarity==='all'||c.rarity===rarity)&&(ownership==='all'||ownership==='owned'&&profile?.owned?.[c.id]>0||ownership==='missing'&&!profile?.owned?.[c.id])).sort((a,b)=>sort==='name'?a.name.localeCompare(b.name):sort==='cost'?a.cost-b.cost||a.name.localeCompare(b.name):sort==='rarity'?rarities.indexOf(b.rarity)-rarities.indexOf(a.rarity):a.id-b.id);
