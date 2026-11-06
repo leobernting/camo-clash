@@ -5,7 +5,7 @@ import {cards,cardSets,starter,battle,act,unitAttack,unitArmor,maxHealth} from '
 const source=stripTypeScriptTypes(readFileSync(new URL('../app/packs.ts',import.meta.url),'utf8')).replace("'./game'",JSON.stringify(new URL('../app/game.ts',import.meta.url).href));
 const {openPacks}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 const put=(s,id,i)=>s.players[0].board[i]={id,hp:cards[id].hp,maxHp:cards[id].hp,hidden:!!cards[id].startsHidden,used:false,flags:{},bonusAttack:0,tempAttack:0};
-const fresh=()=>{const s=battle(starter().deck,starter().deck,false);s.players.forEach(p=>{p.pile=Array(100).fill(0);p.board[4]={id:51,hp:100,maxHp:100,hidden:false};});s.players[0].mana=100;return s;};
+const fresh=()=>{const s=battle(starter().deck,starter().deck,false);s.round=3;s.players.forEach(p=>{p.pile=Array(100).fill(0);p.board[4]={id:51,hp:100,maxHp:100,hidden:false};});s.players[0].mana=100;return s;};
 const cycle=s=>{act(s,0,{kind:'end'});act(s,1,{kind:'end'});s.players[0].mana=100;};
 const play=(s,id,slot)=>{s.players[0].hand.push(id);act(s,0,{kind:'play',index:s.players[0].hand.length-1,slot});};
 assert.equal(cards.length,129);assert.equal(new Set(cards.map(c=>c.name)).size,129);

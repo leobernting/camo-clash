@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {cards,starter,battle,act,unitAttack,unitArmor,maxHealth} from '../app/game.ts';
 const put=(s,id,i,who=0)=>s.players[who].board[i]={id,hp:cards[id].hp,maxHp:cards[id].hp,hidden:!!cards[id].startsHidden,used:false,flags:{},bonusAttack:0,tempAttack:0};
-const fresh=()=>{const s=battle(starter().deck,starter().deck,false);put(s,51,4,1).hp=100;put(s,51,4).hp=100;s.players[0].mana=100;s.players[0].pile=Array(100).fill(0);return s;};
+const fresh=()=>{const s=battle(starter().deck,starter().deck,false);s.round=3;put(s,51,4,1).hp=100;put(s,51,4).hp=100;s.players[0].mana=100;s.players[0].pile=Array(100).fill(0);return s;};
 const play=(s,id,slot)=>{s.players[0].hand.push(id);act(s,0,{kind:'play',index:s.players[0].hand.length-1,slot});};
 const cycle=s=>{act(s,0,{kind:'end'});act(s,1,{kind:'end'});s.players[0].mana=100;};
 const attack=(s,i)=>act(s,0,{kind:'attack',index:i,target:4});

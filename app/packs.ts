@@ -3,9 +3,15 @@ export const specialCards=cards.filter(c=>['hit','superhit','hyper','chase','gol
 export const CHASE_CHANCE=1/2000;
 export const GOLD_CHANCE=1/100000;
 // A single hidden luck counter covers Hit, Super-hit and Hyper Rare together.
-// Initial per-pack odds: Hit 1/100, Super-hit 1/200, Hyper Rare 1/1000.
+// Initial per-pack odds: Hit 1.1%, Super-hit 0.55%, Hyper Rare 0.11%.
+// A modest 10% relative increase. Fixed Chase and Gold rolls stay unchanged.
 // Each miss adds 0.1 percentage points to the combined special-pull chance.
-export const specialChance=(misses:number)=>Math.min(1,.016+Math.max(0,misses)*.001);
+export const specialChance=(misses:number)=>Math.min(1,.0176+Math.max(0,misses)*.001);
+export function ordinaryRarity(roll:number,final=false){
+ // Regular slots: Common 50.5%, Uncommon 38.5%, Rare 8.8%, Epic 2.2%.
+ // Finale: Uncommon 5%, Rare 48.8%, Epic 33%, Legendary 13.2%.
+ return final?(roll<.132?'legendary':roll<.462?'epic':roll<.95?'rare':'uncommon'):(roll<.505?'common':roll<.89?'uncommon':roll<.978?'rare':'epic');
+}
 export function specialTier(roll:number){return roll<1/16?'hyper':roll<6/16?'superhit':'hit';}
 export function openPacks(p:any,count:number,random:()=>number=Math.random,free=false,setId='all'){
  if(setId!=='all'&&!cardSets.some(s=>s.id===setId))throw Error('Choose a valid card set.');const collection=setId==='all'?cards:cards.filter(c=>c.set===setId&&!c.mixedOnly);
@@ -15,7 +21,7 @@ export function openPacks(p:any,count:number,random:()=>number=Math.random,free=
   const chance=specialChance(p.chaseMisses);let special=-1;
   if(random()<chance){const tier=specialTier(random()),choices=collection.filter(c=>c.rarity===tier),pool=choices.length?choices:cards.filter(c=>c.rarity===tier);special=pool[Math.floor(random()*pool.length)].id;p.chaseMisses=0;}else p.chaseMisses++;
   const packPulls:number[]=[];for(let i=0;i<7;i++){
-   let id:number;if(i===6&&special>=0)id=special;else{const r=random(),rarity=i===6?(r<.12?'legendary':r<.42?'epic':'rare'):(r<.55?'common':r<.9?'uncommon':r<.98?'rare':'epic');const pool=collection.filter(c=>!specialCards.includes(c.id)&&c.rarity===rarity);id=pool[Math.floor(random()*pool.length)].id;}
+   let id:number;if(i===6&&special>=0)id=special;else{const rarity=ordinaryRarity(random(),i===6);const pool=collection.filter(c=>!specialCards.includes(c.id)&&c.rarity===rarity);id=pool[Math.floor(random()*pool.length)].id;}
    packPulls.push(id);
   }
   // Independent fixed roll. Chases never read or modify the shared luck counter.

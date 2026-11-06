@@ -1,7 +1,7 @@
 ﻿import assert from 'node:assert/strict';
 import {battle,act,botStep,starter,upgradeProfile,cards} from '../app/game.ts';
 const unit=(id,hp=cards[id].hp)=>({id,hp,hidden:false,used:false});
-const fresh=()=>battle(starter().deck,starter().deck);
+const fresh=()=>{const s=battle(starter().deck,starter().deck);s.round=3;return s;};
 const profile=starter();assert.equal(profile.deck.length,40);
 for(const c of cards)assert.ok(profile.deck.filter(id=>id===c.id).length<=3);
 const old={owned:{0:5},deck:[0,0,0,0],coins:99,binder:[0],wins:2};upgradeProfile(old);assert.equal(old.deck.length,40);assert.equal(old.owned[0],5);assert.equal(old.coins,99);

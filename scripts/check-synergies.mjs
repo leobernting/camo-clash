@@ -2,7 +2,7 @@
 import {cards,starter,battle,act,unitAttack,unitArmor,maxHealth,attackDamage,canAttack,cardCost,hideCost,botStep} from '../app/game.ts';
 const unit=id=>({id,hp:cards[id].hp,maxHp:cards[id].hp,hidden:!!cards[id].startsHidden,used:false,flags:{},bonusAttack:0,tempAttack:0});
 const put=(s,who,id,slot)=>s.players[who].board[slot]=unit(id);
-const fresh=()=>{const s=battle(starter().deck,starter().deck);put(s,1,51,4);return s;};
+const fresh=()=>{const s=battle(starter().deck,starter().deck);s.round=3;put(s,1,51,4);return s;};
 const cycle=s=>{act(s,0,{kind:'end'});assert.equal(s.winner,null);act(s,1,{kind:'end'});};
 const play=(s,id,slot)=>{s.players[0].hand.push(id);act(s,0,{kind:'play',index:s.players[0].hand.length-1,slot});};
 let s=fresh();put(s,0,46,0);let hand=s.players[0].hand.length,pile=s.players[0].pile.length;cycle(s);assert.equal(s.players[0].hand.length,hand+2);assert.equal(s.players[0].pile.length,pile-2);cycle(s);assert.equal(s.players[0].hand.length,hand+4);assert.ok(s.log.some(x=>x.includes('Professor Tonguestein: drew 1')));
