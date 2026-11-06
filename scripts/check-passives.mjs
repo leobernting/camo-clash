@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import {cards,starter,battle,act,unitAttack,unitArmor,maxHealth} from '../app/game.ts';
+const put=(s,id,i,who=0)=>s.players[who].board[i]={id,hp:cards[id].hp,maxHp:cards[id].hp,hidden:!!cards[id].startsHidden,used:false,flags:{},bonusAttack:0,tempAttack:0};
+const fresh=()=>{const s=battle(starter().deck,starter().deck,false);put(s,51,4,1).hp=100;put(s,51,4).hp=100;s.players[0].mana=100;s.players[0].pile=Array(100).fill(0);return s;};
+const play=(s,id,slot)=>{s.players[0].hand.push(id);act(s,0,{kind:'play',index:s.players[0].hand.length-1,slot});};
+const cycle=s=>{act(s,0,{kind:'end'});act(s,1,{kind:'end'});s.players[0].mana=100;};
+const attack=(s,i)=>act(s,0,{kind:'attack',index:i,target:4});
+const harvest=(s,i)=>act(s,0,{kind:'harvest',index:i});
+for(let id=66;id<86;id++){assert.ok(cards[id].passive);const s=fresh();play(s,id,0);assert.equal(s.players[0].board[0].id,id);assert.equal(s.players[0].board[0].hidden,!!cards[id].startsHidden);}
+for(const [source,ally,other] of [[67,26,0],[72,20,26],[74,0,26]]){const s=fresh();put(s,source,0);put(s,ally,1);put(s,other,2);assert.equal(unitArmor(s,0,1),1);assert.equal(unitArmor(s,0,0),0);assert.equal(unitArmor(s,0,2),0);s.players[0].board[0].hp=0;assert.equal(unitArmor(s,0,1),0);}
+for(const [source,ally,bonus] of [[76,69,1],[81,20,1],[85,69,2]]){const s=fresh();put(s,source,0);put(s,ally,1);assert.equal(unitAttack(s,0,1),cards[ally].attack+bonus);assert.equal(unitAttack(s,0,0),cards[source].attack);s.players[0].board[0]=null;assert.equal(unitAttack(s,0,1),cards[ally].attack);}
+let s=fresh();put(s,66,0);let h=s.players[0].hand.length;play(s,8);play(s,9);assert.equal(s.players[0].hand.length,h+1);cycle(s);h=s.players[0].hand.length;play(s,8);assert.equal(s.players[0].hand.length,h+1);
+s=fresh();put(s,68,0).hp=1;put(s,72,1).hp=1;put(s,26,2).hp=1;cycle(s);assert.equal(s.players[0].board[0].hp,3);assert.equal(s.players[0].board[1].hp,3);assert.equal(s.players[0].board[2].hp,1);
+s=fresh();put(s,69,0);put(s,76,1);h=s.players[0].hand.length;attack(s,0);assert.equal(s.players[0].mana,101);assert.equal(s.players[0].hand.length,h+1);attack(s,1);assert.equal(s.players[0].mana,101);assert.equal(s.players[0].hand.length,h+1);cycle(s);attack(s,0);assert.equal(s.players[0].mana,101);
+s=fresh();put(s,70,0);put(s,84,1);put(s,80,2);h=s.players[0].hand.length;act(s,0,{kind:'hide',index:2});assert.equal(s.players[0].mana,101);assert.equal(s.players[0].hand.length,h+1);assert.equal(unitAttack(s,0,2),cards[80].attack+1);act(s,0,{kind:'hide',index:2});act(s,0,{kind:'hide',index:2});assert.equal(s.players[0].mana,100);assert.equal(s.players[0].hand.length,h+1);h=s.players[0].hand.length;cycle(s);assert.equal(s.players[0].hand.length,h+3,'normal, hidden Phantom, reveal draw');assert.equal(unitAttack(s,0,2),cards[80].attack+1);act(s,0,{kind:'end'});assert.equal(s.players[0].board[2].tempAttack,0);
+s=fresh();put(s,71,0);put(s,83,1);play(s,12);assert.equal(s.players[0].board[0].bonusAttack,0);put(s,26,2).hp=1;h=s.players[0].hand.length;play(s,12);assert.equal(s.players[0].board[0].bonusAttack,1);assert.equal(s.players[0].hand.length,h+1);s.players[0].board[2].hp=1;play(s,12);assert.equal(s.players[0].board[0].bonusAttack,1);assert.equal(s.players[0].hand.length,h+1);cycle(s);assert.equal(s.players[0].board[0].bonusAttack,1);
+s=fresh();put(s,73,0);play(s,69,1);play(s,79,2);assert.equal(maxHealth(s.players[0].board[1]),cards[69].hp+1);assert.equal(maxHealth(s.players[0].board[2]),cards[79].hp);
+s=fresh();put(s,74,0);act(s,0,{kind:'end'});act(s,1,{kind:'end'});assert.equal(s.players[0].mana,1);s.players[0].land=8;act(s,0,{kind:'end'});act(s,1,{kind:'end'});assert.equal(s.players[0].mana,2);
+s=fresh();put(s,75,0).hp=1;put(s,26,1).hp=1;h=s.players[0].hand.length;cycle(s);assert.equal(s.players[0].board[0].hp,3);assert.equal(s.players[0].board[1].hp,cards[26].hp);assert.equal(s.players[0].hand.length,h+2);
+s=fresh();put(s,77,0);put(s,0,1);put(s,0,2);h=s.players[0].hand.length;cycle(s);assert.equal(s.players[0].hand.length,h+2);harvest(s,1);harvest(s,2);assert.equal(s.players[0].hand.length,h+3);
+s=fresh();put(s,78,0).hp=1;put(s,26,1).hp=1;attack(s,0);assert.equal(s.players[0].board[0].hp,3);attack(s,1);assert.equal(s.players[0].board[1].hp,1);
+for(const [id,n] of [[79,1],[85,2]]){s=fresh();put(s,id,0).hp=1;put(s,69,1).hp=1;play(s,10);assert.equal(s.players[0].board[1].hp,1+n);const atk=unitAttack(s,0,1);play(s,10);assert.equal(s.players[0].board[1].hp,1+n);assert.equal(unitAttack(s,0,1),atk);cycle(s);assert.equal(s.players[0].board[1].tempAttack,0);}
+s=fresh();put(s,80,0).hidden=false;put(s,70,1).hp=1;attack(s,0);assert.equal(s.players[0].board[1].hp,2);
+s=fresh();put(s,81,0);h=s.players[0].hand.length;play(s,68,1);play(s,72,2);assert.equal(s.players[0].hand.length,h+1);
+s=fresh();put(s,82,0);put(s,0,1);put(s,0,2);h=s.players[0].hand.length;cycle(s);assert.equal(s.players[0].hand.length,h+1);s.players[0].land=9;h=s.players[0].hand.length;cycle(s);assert.equal(s.players[0].hand.length,h+2);harvest(s,1);harvest(s,2);assert.equal(maxHealth(s.players[0].board[1]),cards[0].hp+1);assert.equal(maxHealth(s.players[0].board[0]),cards[82].hp);
+s=fresh();put(s,83,0);play(s,26,1);play(s,36,2);assert.equal(s.players[0].board[1].bonusAttack,1);assert.equal(s.players[0].board[2].bonusAttack,0);
+console.log('Passed: all 20 new summons, passive auras and removal, first-action caps, owner-turn resets, actual-heal gating, permanent/temporary buffs, reveal farming protection, Vehicle healing, and conditional draw/mana.');

@@ -1,5 +1,5 @@
 export const tribes=['Canopy','Gourmet','Trickster','Clockwork','Showtime'] as const;
-export type CardRule={cost?:number;attack?:number;hp?:number;text:string;tribe?:string;tags?:string[];harvest?:number;summonDraw?:number;summonMana?:number;startsHidden?:boolean;armor?:number;startDraw?:number;drawCondition?:string;startHeal?:string;startMana?:number};
+export type CardRule={passive?:boolean;cost?:number;attack?:number;hp?:number;text:string;tribe?:string;tags?:string[];harvest?:number;summonDraw?:number;summonMana?:number;startsHidden?:boolean;armor?:number;startDraw?:number;drawCondition?:string;startHeal?:string;startHealAmount?:number;startMana?:number;startManaCondition?:string;auraAttack?:number;auraAttackGroup?:string;auraArmor?:number;auraArmorGroup?:string};
 export const cardRules:Record<number,CardRule>={
  0:{attack:1,hp:2,tribe:'Canopy',harvest:1,text:'Harvest 1: use your action to gain 1 mana.'},
  1:{attack:3,hp:2,tribe:'Gourmet',text:'The first other Gourmet you summon each turn gives Toast +1 attack permanently.'},
@@ -66,5 +66,25 @@ export const cardRules:Record<number,CardRule>={
  62:{cost:4,attack:2,hp:5,tribe:'Trickster',startsHidden:true,text:'Arrives hidden. Reveal: draw 1, once per turn. Your first hide each turn costs 0 mana.'},
  63:{attack:5,hp:7,tribe:'Clockwork',text:'Your first Harvest each turn deals 1 damage to every visible enemy camo.'},
  64:{attack:4,hp:4,tribe:'Showtime',text:'Your first spell each turn gives all friendly Showtime camos +2 attack this turn.'},
- 65:{attack:5,hp:6,tribe:'Trickster',startsHidden:true,text:'Arrives hidden. Your first Trickster attack each turn draws 2 cards.'}
+ 65:{attack:5,hp:6,tribe:'Trickster',startsHidden:true,text:'Arrives hidden. Your first Trickster attack each turn draws 2 cards.'},
+ 66:{passive:true,tribe:'Canopy',text:'Passive: the first land you play each turn draws a card.'},
+ 67:{passive:true,tribe:'Gourmet',auraArmor:1,auraArmorGroup:'Gourmet',text:'Passive: your other Gourmets take 1 less attack damage, minimum 1.'},
+ 68:{passive:true,tribe:'Clockwork',tags:['Vehicle'],startHeal:'Vehicle',startHealAmount:2,text:'Vehicle. Start of your turn: heal all friendly Vehicles by 2.'},
+ 69:{passive:true,tribe:'Showtime',text:'Passive: your first Showtime attack each turn gives you 1 mana.'},
+ 70:{passive:true,tribe:'Trickster',startsHidden:true,text:'Arrives hidden. When a friendly Trickster reveals, draw a card. Once per turn.'},
+ 71:{passive:true,tribe:'Gourmet',text:'Passive: after your first actual heal each turn, your Gourmets gain +1 attack permanently.'},
+ 72:{passive:true,tribe:'Clockwork',tags:['Vehicle'],auraArmor:1,auraArmorGroup:'Vehicle',text:'Vehicle. Passive: your other Vehicles take 1 less attack damage, minimum 1.'},
+ 73:{passive:true,tribe:'Showtime',text:'Passive: the first other Showtime you summon each turn gains +1 maximum health and heals 1.'},
+ 74:{passive:true,tribe:'Canopy',auraArmor:1,auraArmorGroup:'Canopy',startMana:1,startManaCondition:'land',text:'Your other Canopy camos have Armor 1. Start of your turn: gain 1 mana if you have a land.'},
+ 75:{passive:true,tribe:'Gourmet',startHeal:'Gourmet',startHealAmount:2,text:'Start of your turn: heal your Gourmets by 2. After your first actual heal each turn, draw a card.'},
+ 76:{passive:true,tribe:'Showtime',auraAttack:1,auraAttackGroup:'Showtime',text:'Your other Showtime camos have +1 attack. Your first Showtime attack each turn draws a card.'},
+ 77:{passive:true,tribe:'Clockwork',startDraw:1,text:'Start of your turn: draw an extra card. Your first Harvest each turn draws another card.'},
+ 78:{passive:true,tribe:'Gourmet',text:'Passive: after your first Gourmet attack each turn, heal the attacker by 2.'},
+ 79:{passive:true,tribe:'Showtime',text:'Your first spell each turn gives your Showtime camos +1 attack this turn and heals them by 1.'},
+ 80:{passive:true,tribe:'Trickster',startsHidden:true,text:'Arrives hidden. Reveal: gain 1 mana, once per turn. Your first Trickster attack each turn heals your Tricksters by 1.'},
+ 81:{passive:true,tribe:'Clockwork',tags:['Vehicle'],auraAttack:1,auraAttackGroup:'Vehicle',text:'Vehicle. Your other Vehicles have +1 attack. The first other Clockwork you summon each turn draws a card.'},
+ 82:{passive:true,tribe:'Canopy',startDraw:1,drawCondition:'land',text:'Start of your turn: draw 1 extra if you have a land. Your first Harvest each turn gives other Canopy camos +1 maximum health and heals 1.'},
+ 83:{passive:true,tribe:'Gourmet',text:'The first other Gourmet you summon each turn gains +1 attack permanently. After your first actual heal each turn, draw a card.'},
+ 84:{passive:true,tribe:'Trickster',startsHidden:true,startDraw:1,drawCondition:'hidden',text:'Arrives hidden. Start of your turn: draw 1 extra if this was hidden. A friendly Trickster reveal gives your Tricksters +1 attack this turn, once per turn.'},
+ 85:{passive:true,tribe:'Showtime',auraAttack:2,auraAttackGroup:'Showtime',text:'Your other Showtime camos have +2 attack. Your first spell each turn heals your Showtime camos by 2.'}
 };
