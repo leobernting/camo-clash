@@ -1,5 +1,6 @@
 import {cards,cardSets} from './game';
-export const specialCards=cards.filter(c=>['hit','superhit','chase'].includes(c.rarity)).map(c=>c.id);
+export const specialCards=cards.filter(c=>['hit','superhit','chase','hyper'].includes(c.rarity)).map(c=>c.id);
+export const HYPER_CHANCE=1/2000;
 // A single hidden luck counter covers Hit, Super-hit and Chase together.
 // Initial per-pack odds: Hit 1/100, Super-hit 1/200, Chase 1/1000.
 // Each miss adds 0.1 percentage points to the combined special-pull chance.
@@ -14,7 +15,11 @@ export function openPacks(p:any,count:number,random:()=>number=Math.random,free=
   if(random()<chance){const tier=specialTier(random()),choices=collection.filter(c=>c.rarity===tier),pool=choices.length?choices:cards.filter(c=>c.rarity===tier);special=pool[Math.floor(random()*pool.length)].id;p.chaseMisses=0;}else p.chaseMisses++;
   const packPulls:number[]=[];for(let i=0;i<7;i++){
    let id:number;if(i===6&&special>=0)id=special;else{const r=random(),rarity=i===6?(r<.12?'legendary':r<.42?'epic':'rare'):(r<.55?'common':r<.9?'uncommon':r<.98?'rare':'epic');const pool=collection.filter(c=>!specialCards.includes(c.id)&&c.rarity===rarity);id=pool[Math.floor(random()*pool.length)].id;}
-   packPulls.push(id);p.owned[id]=(p.owned[id]||0)+1;
-  }const rank=['common','uncommon','rare','epic','legendary','hit','superhit','chase'];packPulls.sort((a,b)=>rank.indexOf(cards[a].rarity)-rank.indexOf(cards[b].rarity));pulls.push(...packPulls);p.packsOpened++;if(special>=0)hits.push({pack:pack+1,id:special});
+   packPulls.push(id);
+  }
+  // Independent fixed roll. Hyper Rares never read or modify the shared luck counter.
+  if(random()<HYPER_CHANCE){const pool=collection.filter(c=>c.rarity==='hyper'),hyper=pool[Math.floor(random()*pool.length)].id;if(special>=0)packPulls[5]=special;packPulls[6]=hyper;hits.push({pack:pack+1,id:hyper});}
+  packPulls.forEach(id=>p.owned[id]=(p.owned[id]||0)+1);
+  const rank=['common','uncommon','rare','epic','legendary','hit','superhit','chase','hyper'];packPulls.sort((a,b)=>rank.indexOf(cards[a].rarity)-rank.indexOf(cards[b].rarity));pulls.push(...packPulls);p.packsOpened++;if(special>=0)hits.push({pack:pack+1,id:special});
  }return {pulls,hits,profile:p};
 }

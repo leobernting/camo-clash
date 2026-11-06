@@ -8,9 +8,9 @@ const put=(s,id,i)=>s.players[0].board[i]={id,hp:cards[id].hp,maxHp:cards[id].hp
 const fresh=()=>{const s=battle(starter().deck,starter().deck,false);s.players.forEach(p=>{p.pile=Array(100).fill(0);p.board[4]={id:51,hp:100,maxHp:100,hidden:false};});s.players[0].mana=100;return s;};
 const cycle=s=>{act(s,0,{kind:'end'});act(s,1,{kind:'end'});s.players[0].mana=100;};
 const play=(s,id,slot)=>{s.players[0].hand.push(id);act(s,0,{kind:'play',index:s.players[0].hand.length-1,slot});};
-assert.equal(cards.length,110);assert.equal(new Set(cards.map(c=>c.name)).size,110);
+assert.equal(cards.length,116);assert.equal(new Set(cards.map(c=>c.name)).size,116);
 for(const set of cardSets.filter(s=>s.id!=='core')){
- const pool=cards.filter(c=>c.set===set.id);assert.equal(pool.length,8);assert.ok(set.combo.every(id=>cards[id].set===set.id));
+ const pool=cards.filter(c=>c.set===set.id&&c.id<110);assert.equal(pool.length,8);assert.ok(set.combo.every(id=>cards[id].set===set.id));
  for(const card of pool){const s=fresh();play(s,card.id,0);assert.equal(s.players[0].board[0].id,card.id);
   for(const setId of ['all',set.id]){
    const selected=setId==='all'?cards:pool,rolls=[],special=['hit','superhit'].includes(card.rarity);if(special){const tier=selected.filter(c=>c.rarity===card.rarity);rolls.push(0,card.rarity==='hit'?.8:.1,(tier.findIndex(c=>c.id===card.id)+.1)/tier.length);}else rolls.push(.99);

@@ -116,5 +116,11 @@ export const cardRules:Record<number,CardRule>={
  106:{set:'snack',tribe:'Gourmet',tags:['Snack'],startHeal:'Snack',startHealAmount:2,text:'Snack. Start of your turn: heal your Snack camos by 2.'},
  107:{set:'snack',tribe:'Gourmet',tags:['Snack'],passive:true,auraAttack:1,auraAttackGroup:'Snack',text:'Snack. Your other Snack camos have +1 attack.'},
  108:{set:'snack',tribe:'Gourmet',tags:['Snack'],passive:true,healDraw:1,startHeal:'self',text:'Snack. Start of your turn: heal this camo by 1. After your first actual heal each turn, draw a card.'},
- 109:{set:'snack',tribe:'Gourmet',tags:['Snack'],passive:true,healAttackGroup:'Snack',text:'Snack. After your first actual heal each turn, your Snack camos gain +1 attack permanently.'}
+ 109:{set:'snack',tribe:'Gourmet',tags:['Snack'],passive:true,healAttackGroup:'Snack',text:'Snack. After your first actual heal each turn, your Snack camos gain +1 attack permanently.'},
+ 110:{set:'core',text:'Spell: swap the positions of two visible enemy camos. Their health and effects stay with them.'},
+ 111:{set:'core',tribe:'Showtime',text:'Attack: trace a camo in 10 seconds. Accurate outlines add up to 6 damage. No drawing gives no bonus.'},
+ 112:{set:'core',tribe:'Canopy',harvest:2,startDraw:1,text:'Harvest 2. Start of your turn: draw an extra card.'},
+ 113:{set:'junction',tribe:'Clockwork',tags:['Junction','Vehicle'],harvest:2,harvestDraw:1,text:'Junction / Vehicle. Harvest 2. Your first Harvest each turn draws a card.'},
+ 114:{set:'masquerade',tribe:'Trickster',tags:['Masquerade'],startsHidden:true,startDraw:1,drawCondition:'hidden',auraAttack:1,auraAttackGroup:'Masquerade',text:'Masquerade. Arrives hidden. Your other Masquerade camos have +1 attack. Start of your turn: draw 1 extra if this was hidden.'},
+ 115:{set:'snack',tribe:'Gourmet',tags:['Snack'],startHeal:'Snack',startHealAmount:2,healDraw:1,text:'Snack. Start of your turn: heal your Snack camos by 2. After your first actual heal each turn, draw a card.'}
 };
