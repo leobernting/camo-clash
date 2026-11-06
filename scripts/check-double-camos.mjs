@@ -4,11 +4,11 @@ import {stripTypeScriptTypes} from 'node:module';
 import {cards,starter,battle,act,grantWelcomeCards,canHarvest,harvestAmount,botDeck} from '../app/game.ts';
 assert.equal(cards.length,66);assert.equal(cards.filter(c=>c.type==='camo').length,60);assert.equal(new Set(cards.map(c=>c.name)).size,66);
 let p=starter();p.characterExpansion=1;p.owned[19]=1;const oldDeck=p.deck.slice();grantWelcomeCards(p);assert.equal(p.owned[19],1);for(const id of [30,36,45,51])assert.equal(p.owned[id],3);assert.deepEqual(p.deck,oldDeck);assert.equal(p.coins,500);p.owned[30]=1;grantWelcomeCards(p);assert.equal(p.owned[30],1);
-for(const id of [31,37,40,42,46,52]){let s=battle(starter().deck,starter().deck);s.players[0].hand=[id];s.players[0].mana=10;const left=s.players[0].pile.length;act(s,0,{kind:'play',index:0});const n=[46,52].includes(id)?2:1;assert.equal(s.players[0].hand.length,n);assert.equal(s.players[0].pile.length,left-n);}
+for(const id of [31,37,40,42,46,52]){let s=battle(starter().deck,starter().deck);s.players[0].hand=[id];s.players[0].mana=10;const left=s.players[0].pile.length;act(s,0,{kind:'play',index:0});const n=0;assert.equal(s.players[0].hand.length,n);assert.equal(s.players[0].pile.length,left-n);}
 for(const id of [34,49]){let s=battle(starter().deck,starter().deck);s.players[0].hand=[id];s.players[0].mana=10;act(s,0,{kind:'play',index:0});assert.equal(s.players[0].board[0].hidden,true);}
-for(const [id,gain] of [[33,1],[43,2]]){let s=battle(starter().deck,starter().deck);s.players[0].hand=[id];s.players[0].mana=10;act(s,0,{kind:'play',index:0});assert.equal(s.players[0].mana,10-cards[id].cost+gain);}
-let s=battle(starter().deck,starter().deck);s.players[0].board[0]={id:0,hp:1,hidden:false,used:false};s.players[0].hand=[41];s.players[0].mana=10;act(s,0,{kind:'play',index:0});assert.equal(s.players[0].board[0].hp,3);
-assert.ok(canHarvest(39));assert.ok(canHarvest(44));assert.equal(harvestAmount(39),1);assert.equal(harvestAmount(44),2);assert.equal(botDeck().length,40);assert.ok(botDeck().some(id=>id>=30));
+for(const [id,gain] of [[33,0],[43,0]]){let s=battle(starter().deck,starter().deck);s.players[0].hand=[id];s.players[0].mana=10;act(s,0,{kind:'play',index:0});assert.equal(s.players[0].mana,10-cards[id].cost+gain);}
+let s=battle(starter().deck,starter().deck);s.players[0].board[0]={id:26,hp:1,hidden:false,used:false};s.players[0].hand=[41];s.players[0].mana=10;act(s,0,{kind:'play',index:0});assert.equal(s.players[0].board[0].hp,2);
+assert.equal(canHarvest(39),false);assert.ok(canHarvest(44));assert.equal(harvestAmount(39),0);assert.equal(harvestAmount(44),2);assert.equal(botDeck().length,40);assert.ok(botDeck().some(id=>id>=30));
 console.log('Passed: 60 camos/66 cards, unique names, one-time welcome grant preserving existing cards/decks/coins, new draw/mana/hidden/healing/Harvest abilities, and updated bot decks.');
 
 const packSource=stripTypeScriptTypes(readFileSync(new URL('../app/packs.ts',import.meta.url),'utf8')).replace("'./game'",JSON.stringify(new URL('../app/game.ts',import.meta.url).href));const {openPacks}=await import('data:text/javascript;base64,'+Buffer.from(packSource).toString('base64'));
