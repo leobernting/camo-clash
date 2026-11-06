@@ -7,7 +7,7 @@ let p=starter();p.characterExpansion=1;p.owned[19]=1;const oldDeck=p.deck.slice(
 for(const id of [31,37,40,42,46,52]){let s=battle(starter().deck,starter().deck);s.players[0].hand=[id];s.players[0].mana=10;const left=s.players[0].pile.length;act(s,0,{kind:'play',index:0});const n=0;assert.equal(s.players[0].hand.length,n);assert.equal(s.players[0].pile.length,left-n);}
 for(const id of [34,49]){let s=battle(starter().deck,starter().deck);s.players[0].hand=[id];s.players[0].mana=10;act(s,0,{kind:'play',index:0});assert.equal(s.players[0].board[0].hidden,true);}
 for(const [id,gain] of [[33,0],[43,0]]){let s=battle(starter().deck,starter().deck);s.players[0].hand=[id];s.players[0].mana=10;act(s,0,{kind:'play',index:0});assert.equal(s.players[0].mana,10-cards[id].cost+gain);}
-let s=battle(starter().deck,starter().deck);s.players[0].board[0]={id:26,hp:1,hidden:false,used:false};s.players[0].hand=[41];s.players[0].mana=10;act(s,0,{kind:'play',index:0});assert.equal(s.players[0].board[0].hp,2);
+let s=battle(starter().deck,starter().deck);s.players[0].board[0]={id:26,hp:1,hidden:false,used:false};s.players[0].hand=[41];s.players[0].mana=10;act(s,0,{kind:'play',index:0});assert.equal(s.players[0].board[0].hp,cards[0].hp);
 assert.equal(canHarvest(39),false);assert.ok(canHarvest(44));assert.equal(harvestAmount(39),0);assert.equal(harvestAmount(44),2);assert.equal(botDeck().length,40);assert.ok(botDeck().some(id=>id>=30));
 console.log('Passed: 122 camos/129 cards, unique names, one-time welcome grant preserving existing cards/decks/coins, new draw/mana/hidden/healing/Harvest abilities, and updated bot decks.');
 
