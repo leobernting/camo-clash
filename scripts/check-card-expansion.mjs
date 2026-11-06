@@ -2,7 +2,7 @@
 import {readFileSync} from 'node:fs';
 import {stripTypeScriptTypes} from 'node:module';
 import {cards,starter,battle,act,canHarvest,harvestAmount,grantWelcomeCards,botDeck} from '../app/game.ts';
-assert.equal(cards.length,86);assert.equal(cards[19].name,'Hat Camo');assert.equal(cards[20].name,'Camo Car');assert.equal(new Set(cards.map(c=>c.name)).size,86);
+assert.equal(cards.length,110);assert.equal(cards[19].name,'Hat Camo');assert.equal(cards[20].name,'Camo Car');assert.equal(new Set(cards.map(c=>c.name)).size,110);
 let p=starter();const saved=p.deck.slice(),coins=p.coins;grantWelcomeCards(p);for(const id of [19,20,26])assert.equal(p.owned[id],3);assert.deepEqual(p.deck,saved);assert.equal(p.coins,coins);p.owned[19]=5;grantWelcomeCards(p);assert.equal(p.owned[19],5);assert.equal(botDeck().length,40);assert.ok(botDeck().includes(20));
 let s=battle(p.deck,p.deck);s.players[0].hand=[19,20,22,23,24,25,27,28,29];s.players[0].mana=30;act(s,0,{kind:'play',index:2,slot:4});assert.equal(s.players[0].board[4].id,22);assert.equal(s.players[0].board[4].hidden,true);
 act(s,0,{kind:'play',index:2,slot:3});assert.equal(s.players[0].board[3].id,23);assert.equal(s.players[0].hand.length,7);
@@ -15,4 +15,4 @@ async function call(a){const r=await fetch(base+'/api/game',{method:'POST',heade
 let profile=await call({kind:'profile'});assert.equal(profile.d.profile.owned[19],3);const newDeck=[...profile.d.profile.deck];newDeck[6]=19;newDeck[7]=20;newDeck[8]=26;let savedDeck=await call({kind:'save',field:'deck',list:newDeck});assert.equal(savedDeck.r.status,200,JSON.stringify(savedDeck.d));assert.deepEqual(savedDeck.d.profile.deck,newDeck);
 const invalid=[...newDeck];invalid[9]=19;invalid[10]=19;invalid[11]=19;assert.equal((await call({kind:'save',field:'deck',list:invalid})).r.status,400);
 const game=await call({kind:'start'});assert.equal(game.d.match.players[0].remaining,35);const art=readFileSync(new URL('../app/card-art.tsx',import.meta.url),'utf8');assert.ok(art.includes('data-art="vector"'));assert.ok(!art.includes('<image'));assert.ok(!art.includes('camo-atlas'));
-console.log('Passed: 86 unique cards, welcome copies without deck/currency loss, new summon/Harvest abilities, expanded pack pool, visual-deck save validation, 40-card match and inline vector artwork without raster references.');
+console.log('Passed: 110 unique cards, welcome copies without deck/currency loss, new summon/Harvest abilities, expanded pack pool, visual-deck save validation, 40-card match and inline vector artwork without raster references.');

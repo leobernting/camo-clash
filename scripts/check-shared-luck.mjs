@@ -12,4 +12,4 @@ for(const [tier,roll] of [['chase',0],['superhit',.1],['hit',.8]])for(let choice
 let p=starter();p.chaseMisses=80;const queue=[.05,.8,0];const bulk=openPacks(p,2,()=>queue.length?queue.shift():.9);assert.equal(bulk.hits.length,1);assert.equal(p.chaseMisses,1,'Second bulk pack starts with reset luck');
 for(const tierRoll of [0,.1,.8]){p=starter();p.chaseMisses=984;const sequence=[.999,tierRoll,0];const d=openPacks(p,1,()=>sequence.length?sequence.shift():.9);assert.equal(d.hits.length,1);assert.equal(p.chaseMisses,0);}
 p=starter();openPacks(p,1,()=>.9);assert.equal(p.chaseMisses,1);assert.equal(p.coins,470);
-console.log('Passed: shared luck boosts all three top tiers, each of all seventeen special cards resets luck, original starting odds, cap, misses and per-pack reset during bulk openings.');
+console.log('Passed: shared luck boosts all three top tiers, each of all twenty-three special cards resets luck, original starting odds, cap, misses and per-pack reset during bulk openings.');

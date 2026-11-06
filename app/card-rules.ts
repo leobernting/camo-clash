@@ -1,5 +1,11 @@
 export const tribes=['Canopy','Gourmet','Trickster','Clockwork','Showtime'] as const;
-export type CardRule={passive?:boolean;cost?:number;attack?:number;hp?:number;text:string;tribe?:string;tags?:string[];harvest?:number;summonDraw?:number;summonMana?:number;startsHidden?:boolean;armor?:number;startDraw?:number;drawCondition?:string;startHeal?:string;startHealAmount?:number;startMana?:number;startManaCondition?:string;auraAttack?:number;auraAttackGroup?:string;auraArmor?:number;auraArmorGroup?:string};
+export const cardSets=[
+ {id:'core',name:'Into the Wild',color:'#8da975',description:'The original canopy collection.',combo:[0,6,32],guide:'Harvest with Sprout Scout, draw with Petal Peeper, then boost your Canopy attackers with Camo-saurus Rex.'},
+ {id:'junction',name:'Jungle Junction',color:'#89ac83',description:'All aboard the Harvest express.',combo:[86,88,92],guide:'Sapling Signalman harvests mana. Ticket Taker turns your first Harvest into a card, while Locomoss grows your Junction crew.'},
+ {id:'masquerade',name:'Midnight Masquerade',color:'#ab96c0',description:'Hide, reveal, steal the spotlight.',combo:[94,96,101],guide:'Hide Masked Munchkin, then reveal it next turn. Velvet Usher draws a card and The Great Hiss-dini gives your Masquerade crew an attack burst.'},
+ {id:'snack',name:'Snack Attack',color:'#d0a47b',description:'A little healing. A very big appetite.',combo:[102,104,109],guide:'Biscuit Bandage heals your Snack crew each turn. Soup-er Visor rewards an actual heal with a card, and Queen of Tarts turns healing into permanent attack.'}
+];
+export type CardRule={set?:string;harvestDraw?:number;harvestGrowGroup?:string;revealDraw?:number;revealMana?:number;revealAttackGroup?:string;healDraw?:number;healAttackGroup?:string;passive?:boolean;cost?:number;attack?:number;hp?:number;text:string;tribe?:string;tags?:string[];harvest?:number;summonDraw?:number;summonMana?:number;startsHidden?:boolean;armor?:number;startDraw?:number;drawCondition?:string;startHeal?:string;startHealAmount?:number;startMana?:number;startManaCondition?:string;auraAttack?:number;auraAttackGroup?:string;auraArmor?:number;auraArmorGroup?:string};
 export const cardRules:Record<number,CardRule>={
  0:{attack:1,hp:2,tribe:'Canopy',harvest:1,text:'Harvest 1: use your action to gain 1 mana.'},
  1:{attack:3,hp:2,tribe:'Gourmet',text:'The first other Gourmet you summon each turn gives Toast +1 attack permanently.'},
@@ -86,5 +92,29 @@ export const cardRules:Record<number,CardRule>={
  82:{passive:true,tribe:'Canopy',startDraw:1,drawCondition:'land',text:'Start of your turn: draw 1 extra if you have a land. Your first Harvest each turn gives other Canopy camos +1 maximum health and heals 1.'},
  83:{passive:true,tribe:'Gourmet',text:'The first other Gourmet you summon each turn gains +1 attack permanently. After your first actual heal each turn, draw a card.'},
  84:{passive:true,tribe:'Trickster',startsHidden:true,startDraw:1,drawCondition:'hidden',text:'Arrives hidden. Start of your turn: draw 1 extra if this was hidden. A friendly Trickster reveal gives your Tricksters +1 attack this turn, once per turn.'},
- 85:{passive:true,tribe:'Showtime',auraAttack:2,auraAttackGroup:'Showtime',text:'Your other Showtime camos have +2 attack. Your first spell each turn heals your Showtime camos by 2.'}
+ 85:{passive:true,tribe:'Showtime',auraAttack:2,auraAttackGroup:'Showtime',text:'Your other Showtime camos have +2 attack. Your first spell each turn heals your Showtime camos by 2.'},
+ 86:{set:'junction',tribe:'Canopy',tags:['Junction'],harvest:1,text:'Junction. Harvest 1: use your action to gain 1 mana.'},
+ 87:{set:'junction',tribe:'Clockwork',tags:['Junction','Vehicle'],harvest:2,text:'Junction / Vehicle. Harvest 2: use your action to gain 2 mana.'},
+ 88:{set:'junction',tribe:'Clockwork',tags:['Junction'],passive:true,harvestDraw:1,text:'Junction. Your first Harvest each turn draws a card.'},
+ 89:{set:'junction',tribe:'Canopy',tags:['Junction'],passive:true,auraArmor:1,auraArmorGroup:'Junction',text:'Junction. Your other Junction camos take 1 less attack damage, minimum 1.'},
+ 90:{set:'junction',tribe:'Canopy',tags:['Junction'],startDraw:1,drawCondition:'harvester',text:'Junction. Start of your turn: draw 1 extra if another friendly camo has Harvest.'},
+ 91:{set:'junction',tribe:'Clockwork',tags:['Junction','Vehicle'],passive:true,auraAttack:1,auraAttackGroup:'Junction',harvest:1,text:'Junction / Vehicle. Harvest 1. Your other Junction camos have +1 attack.'},
+ 92:{set:'junction',tribe:'Canopy',tags:['Junction'],passive:true,harvestGrowGroup:'Junction',text:'Junction. Your first Harvest each turn gives your other Junction camos +1 maximum health and heals 1.'},
+ 93:{set:'junction',tribe:'Clockwork',tags:['Junction','Vehicle'],passive:true,auraAttack:2,auraAttackGroup:'Junction',text:'Junction / Vehicle. Your other Junction camos have +2 attack.'},
+ 94:{set:'masquerade',tribe:'Trickster',tags:['Masquerade'],startsHidden:true,text:'Masquerade. Arrives hidden. Reveals at the start of your next turn.'},
+ 95:{set:'masquerade',tribe:'Trickster',tags:['Masquerade'],startsHidden:true,revealMana:1,text:'Masquerade. Arrives hidden. Reveal: gain 1 mana, once per turn.'},
+ 96:{set:'masquerade',tribe:'Trickster',tags:['Masquerade'],passive:true,revealDraw:1,text:'Masquerade. A friendly Masquerade reveal draws a card, once per turn.'},
+ 97:{set:'masquerade',tribe:'Trickster',tags:['Masquerade'],passive:true,auraArmor:1,auraArmorGroup:'Masquerade',text:'Masquerade. Your other Masquerade camos take 1 less attack damage, minimum 1.'},
+ 98:{set:'masquerade',tribe:'Trickster',tags:['Masquerade'],startsHidden:true,startDraw:1,drawCondition:'hidden',text:'Masquerade. Arrives hidden. Start of your turn: draw 1 extra if this was hidden.'},
+ 99:{set:'masquerade',tribe:'Trickster',tags:['Masquerade'],passive:true,auraAttack:1,auraAttackGroup:'Masquerade',text:'Masquerade. Your other Masquerade camos have +1 attack.'},
+ 100:{set:'masquerade',tribe:'Trickster',tags:['Masquerade'],startsHidden:true,revealMana:2,text:'Masquerade. Arrives hidden. Reveal: gain 2 mana, once per turn.'},
+ 101:{set:'masquerade',tribe:'Trickster',tags:['Masquerade'],startsHidden:true,passive:true,revealAttackGroup:'Masquerade',text:'Masquerade. Arrives hidden. A friendly Masquerade reveal gives your Masquerade camos +2 attack this turn, once per turn.'},
+ 102:{set:'snack',tribe:'Gourmet',tags:['Snack'],startHeal:'Snack',text:'Snack. Start of your turn: heal your Snack camos by 1.'},
+ 103:{set:'snack',tribe:'Gourmet',tags:['Snack'],harvest:1,text:'Snack. Harvest 1: use your action to gain 1 mana.'},
+ 104:{set:'snack',tribe:'Gourmet',tags:['Snack'],passive:true,healDraw:1,text:'Snack. After your first actual heal each turn, draw a card.'},
+ 105:{set:'snack',tribe:'Gourmet',tags:['Snack'],passive:true,auraArmor:1,auraArmorGroup:'Snack',text:'Snack. Your other Snack camos take 1 less attack damage, minimum 1.'},
+ 106:{set:'snack',tribe:'Gourmet',tags:['Snack'],startHeal:'Snack',startHealAmount:2,text:'Snack. Start of your turn: heal your Snack camos by 2.'},
+ 107:{set:'snack',tribe:'Gourmet',tags:['Snack'],passive:true,auraAttack:1,auraAttackGroup:'Snack',text:'Snack. Your other Snack camos have +1 attack.'},
+ 108:{set:'snack',tribe:'Gourmet',tags:['Snack'],passive:true,healDraw:1,startHeal:'self',text:'Snack. Start of your turn: heal this camo by 1. After your first actual heal each turn, draw a card.'},
+ 109:{set:'snack',tribe:'Gourmet',tags:['Snack'],passive:true,healAttackGroup:'Snack',text:'Snack. After your first actual heal each turn, your Snack camos gain +1 attack permanently.'}
 };

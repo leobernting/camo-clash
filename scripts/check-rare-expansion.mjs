@@ -3,8 +3,8 @@ import {readFileSync} from 'node:fs';
 import {stripTypeScriptTypes} from 'node:module';
 import {cards,starter,battle,act} from '../app/game.ts';
 const source=stripTypeScriptTypes(readFileSync(new URL('../app/packs.ts',import.meta.url),'utf8')).replace("'./game'",JSON.stringify(new URL('../app/game.ts',import.meta.url).href));const {openPacks,specialCards}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
-assert.equal(cards.length,86);assert.equal(cards.filter(c=>c.type==='camo').length,80);assert.equal(specialCards.length,17);for(const r of ['hit','superhit','chase'])assert.equal(cards.filter(c=>c.rarity===r).length,r==='chase'?3:7);
-for(const card of cards.filter(c=>c.id>=54)){
+assert.equal(cards.length,110);assert.equal(cards.filter(c=>c.type==='camo').length,104);assert.equal(specialCards.length,23);for(const r of ['hit','superhit','chase'])assert.equal(cards.filter(c=>c.rarity===r).length,r==='chase'?3:10);
+for(const card of cards.filter(c=>c.id>=54&&c.id<86)){
  const rolls=[];if(['hit','superhit','chase'].includes(card.rarity)){rolls.push(0,card.rarity==='chase'?0:card.rarity==='superhit'?.1:.5);const pool=cards.filter(c=>c.rarity===card.rarity);rolls.push((pool.findIndex(c=>c.id===card.id)+.1)/pool.length);}else rolls.push(.9);
  for(let slot=0;slot<7;slot++){if(slot===6&&['hit','superhit','chase'].includes(card.rarity))continue;const target=slot===6&&!['hit','superhit','chase'].includes(card.rarity),rarity=target?card.rarity:slot===6?'rare':'common';const pool=cards.filter(c=>!specialCards.includes(c.id)&&c.rarity===rarity);rolls.push(target?(rarity==='legendary'?.01:rarity==='rare'?.9:.2):slot===6?.9:.1,target?(pool.findIndex(c=>c.id===card.id)+.1)/pool.length:.5);}
  const p=starter();p.chaseMisses=0;const result=openPacks(p,1,()=>rolls.shift());assert.equal(result.pulls.length,7);assert.ok(result.pulls.includes(card.id),'Card missing: '+card.name);assert.equal(p.owned[card.id],1);assert.equal(result.pulls[6],card.id);if(['hit','superhit','chase'].includes(card.rarity))assert.equal(p.chaseMisses,0);else assert.equal(p.chaseMisses,1);

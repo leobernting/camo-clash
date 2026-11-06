@@ -1,4 +1,5 @@
 import {cardRules} from './card-rules.ts';
+export {cardSets} from './card-rules.ts';
 export const cards = [
  ['Sprout Scout',1,1,3,'common','camo','Harvest: generate 1 mana.','#87c957'],
  ['Toast Malone',2,3,2,'rare','camo','Fierce little flame. Attacks immediately.','#ed8e50'],
@@ -88,8 +89,32 @@ export const cards = [
  ["Celestial Salad",5,1,7,"superhit","camo","","#a8c8a5"],
  ["Marquis Macaron",4,2,5,"superhit","camo","","#c4a3b9"],
  ["Phantom Pianist",5,2,6,"superhit","camo","","#a29abd"],
- ["Obsidian Orchestra",6,3,7,"superhit","camo","","#898ba8"]
-].map((c,i)=>({id:i,name:c[0] as string,cost:c[1] as number,attack:c[2] as number,hp:c[3] as number,rarity:c[4] as string,type:c[5] as string,color:c[7] as string,...cardRules[i],tags:cardRules[i]?.tags||[]}));
+ ["Obsidian Orchestra",6,3,7,"superhit","camo","","#898ba8"],
+["Sapling Signalman",1,1,2,"common","camo","","#8ead75"],
+["Trolley McLeaf",2,0,4,"uncommon","camo","","#8ead75"],
+["Ticket Taker",3,1,4,"rare","camo","","#8ead75"],
+["Railway Rootguard",3,2,5,"rare","camo","","#8ead75"],
+["Platform Professor",4,1,5,"epic","camo","","#8ead75"],
+["Conductor Croak",5,3,5,"legendary","camo","","#8ead75"],
+["Locomoss",4,2,6,"hit","camo","","#8ead75"],
+["The Orient Ex-Hiss",6,4,6,"superhit","camo","","#8ead75"],
+["Masked Munchkin",1,2,2,"common","camo","","#ab96c0"],
+["Coin-Cloak Camo",2,1,3,"uncommon","camo","","#ab96c0"],
+["Velvet Usher",3,1,4,"rare","camo","","#ab96c0"],
+["Bouncer in Disguise",3,2,5,"rare","camo","","#ab96c0"],
+["Madame Peekaboo",4,2,4,"epic","camo","","#ab96c0"],
+["Count Confetti",5,3,5,"legendary","camo","","#ab96c0"],
+["Pocket Dimension Pete",4,2,5,"hit","camo","","#ab96c0"],
+["The Great Hiss-dini",5,3,5,"superhit","camo","","#ab96c0"],
+["Biscuit Bandage",1,0,3,"common","camo","","#d0a47b"],
+["Juice Box Jockey",2,1,4,"uncommon","camo","","#d0a47b"],
+["Soup-er Visor",3,1,4,"rare","camo","","#d0a47b"],
+["Crouton Crusader",3,2,5,"rare","camo","","#d0a47b"],
+["Doctor Broccoli",4,1,6,"epic","camo","","#d0a47b"],
+["Sir Lunch-a-Lot",5,3,6,"legendary","camo","","#d0a47b"],
+["Waffle Warden",4,3,5,"hit","camo","","#d0a47b"],
+["Queen of Tarts",5,2,7,"superhit","camo","","#d0a47b"]
+].map((c,i)=>({id:i,name:c[0] as string,cost:c[1] as number,attack:c[2] as number,hp:c[3] as number,rarity:c[4] as string,type:c[5] as string,color:c[7] as string,...cardRules[i],set:cardRules[i]?.set||'core',tags:cardRules[i]?.tags||[]}));
 
 export const starterDeck=()=>cards.filter(c=>c.id<16).flatMap(c=>Array(c.id<8?3:2).fill(c.id));
 export const botDeck=()=>{const d=starterDeck();[6,7,9,10,12,13,18,19,21,22,36].forEach((slot,i)=>d[slot]=[19,20,30,32,35,36,40,43,46,49,53][i]);return d;};
@@ -120,10 +145,11 @@ export function canAttack(s:any,who:number,index:number){const c=s.players[who].
 export function attackDamage(s:any,who:number,index:number,target:number){const c=s.players[who].board[index],t=s.players[1-who].board[target];if(!c||!t||t.hidden||unitAttack(s,who,index)<=0)return 0;return Math.max(1,unitAttack(s,who,index)+(c.id===21&&t.hp>=5?2:0)-unitArmor(s,1-who,target));}
 function draw(s:any,who:number,n:number,source:string){const p=s.players[who],got=p.pile.splice(0,n);p.hand.push(...got);if(got.length)log(s,source+': drew '+got.length+' card'+(got.length===1?'':'s')+'.');return got.length;}
 function finish(s:any){s.players.forEach((p:any,i:number)=>p.board.forEach((c:any,j:number)=>{if(c&&c.hp<=0){s.players[1-i].souls+=cards[c.id].cost;s.stats[1-i].kills++;p.board[j]=null;log(s,cards[c.id].name+' defeated: +'+cards[c.id].cost+' souls.');}}));if(s.players[0].souls>=10)s.winner=0;else if(s.players[1].souls>=10)s.winner=1;return s;}
-function heal(s:any,who:number,targets:any[],n:number,source:string){let total=0;for(const c of targets){if(!c||c.hp<=0)continue;const healed=Math.min(n,Math.max(0,maxHealth(c)-c.hp));c.hp+=healed;total+=healed;}if(total){log(s,source+': restored '+total+' health.');for(const c of living(s.players[who])){if([45,75,83].includes(c.id)&&once(c,'healDraw'))draw(s,who,1,cards[c.id].name);if(c.id===71&&once(c,'healPower')){for(const ally of living(s.players[who]))if(tribe(ally,'Gourmet'))ally.bonusAttack=(ally.bonusAttack||0)+1;log(s,'Marmalade Medic: Gourmet team gained +1 attack.');}}}return total;}
+function heal(s:any,who:number,targets:any[],n:number,source:string){let total=0;for(const c of targets){if(!c||c.hp<=0)continue;const healed=Math.min(n,Math.max(0,maxHealth(c)-c.hp));c.hp+=healed;total+=healed;}if(total){log(s,source+': restored '+total+' health.');for(const c of living(s.players[who])){if([45,75,83].includes(c.id)&&once(c,'healDraw'))draw(s,who,1,cards[c.id].name);if(cardRules[c.id]?.healDraw&&once(c,'setHealDraw'))draw(s,who,cardRules[c.id].healDraw!,cards[c.id].name);if(cardRules[c.id]?.healAttackGroup&&once(c,'setHealPower'))for(const ally of living(s.players[who]))if(member(ally,cardRules[c.id].healAttackGroup!))ally.bonusAttack=(ally.bonusAttack||0)+1;if(c.id===71&&once(c,'healPower')){for(const ally of living(s.players[who]))if(tribe(ally,'Gourmet'))ally.bonusAttack=(ally.bonusAttack||0)+1;log(s,'Marmalade Medic: Gourmet team gained +1 attack.');}}}return total;}
 function grow(s:any,who:number,targets:any[],n:number,source:string){for(const c of targets)c.maxHp=maxHealth(c)+n;heal(s,who,targets,n,source);}
 function ping(s:any,who:number,n:number,source:string){const targets=living(s.players[1-who]).filter((c:any)=>!c.hidden);for(const c of targets)c.hp-=n;if(targets.length)log(s,source+': '+n+' damage to each visible enemy.');finish(s);}
 function reveal(s:any,who:number,c:any){if(!c?.hidden)return;c.hidden=false;log(s,cards[c.id].name+' revealed.');if(!once(c,'reveal'))return;
+ if(cardRules[c.id]?.revealMana){s.players[who].mana+=cardRules[c.id].revealMana!;log(s,cards[c.id].name+': +'+cardRules[c.id].revealMana+' reveal mana.');}if(tagged(c,'Masquerade'))for(const source of living(s.players[who])){const rule=cardRules[source.id];if(rule?.revealDraw&&once(source,'setRevealDraw'))draw(s,who,rule.revealDraw,cards[source.id].name);if(rule?.revealAttackGroup&&once(source,'setRevealAttack'))for(const ally of living(s.players[who]))if(member(ally,rule.revealAttackGroup))ally.tempAttack=(ally.tempAttack||0)+2;}
  if([3,62].includes(c.id))draw(s,who,1,cards[c.id].name);
  if(c.id===22)c.tempAttack=(c.tempAttack||0)+2;
  if(c.id===56)ping(s,who,1,'Velvet Vanisher');if(c.id===80){s.players[who].mana++;log(s,'Velcro Voyager: +1 reveal mana.');}
@@ -167,7 +193,7 @@ export function act(s:any,who:number,a:any){
   const c=p.board[a.index];if(!slot(a.index)||!c)throw Error('Choose a chameleon.');if(c.hidden)reveal(s,who,c);else{pay(hideCost(s,who));p.turnState.hides++;c.hidden=true;c.used=true;log(s,cards[c.id].name+' hid.');for(const source of living(p))if(source.id===19&&once(source,'hideDraw'))draw(s,who,1,'Hat Camo');}
  }else if(a.kind==='harvest'){
   const c=p.board[a.index];if(!slot(a.index)||!c||!canHarvest(c.id))throw Error('Only camos with Harvest can generate mana.');if(c.used)throw Error('This camo already acted.');c.used=true;p.turnState.harvests++;p.mana+=harvestAmount(c.id);log(s,cards[c.id].name+': harvested '+harvestAmount(c.id)+' mana.');
-  if(p.turnState.harvests===1)for(const source of living(p)){if(s.winner!==null)break;if(source.id===16&&once(source,'harvestDraw')&&living(p).some((x:any)=>x!==source&&tribe(x,'Gourmet')))draw(s,who,1,'Jellybean Juggler');if(source.id===44&&once(source,'harvestHeal'))heal(s,who,living(p).filter((x:any)=>tribe(x,'Canopy')),1,'Grandpa Grip');if(source.id===57&&once(source,'harvestMana')){p.mana++;log(s,'Sir Scales-a-Billion: +1 Harvest mana.');}if(source.id===63&&once(source,'harvestPing'))ping(s,who,1,'Thunderbranch Titan');if(source.id===77&&once(source,'harvestDraw'))draw(s,who,1,'Chrono-Chameleon');if(source.id===82&&once(source,'harvestGrow'))grow(s,who,living(p).filter((x:any)=>x!==source&&tribe(x,'Canopy')),1,'Celestial Salad');}
+  if(p.turnState.harvests===1)for(const source of living(p)){if(s.winner!==null)break;const rule=cardRules[source.id];if(rule?.harvestDraw&&once(source,'setHarvestDraw'))draw(s,who,rule.harvestDraw,cards[source.id].name);if(rule?.harvestGrowGroup&&once(source,'setHarvestGrow'))grow(s,who,living(p).filter((x:any)=>x!==source&&member(x,rule.harvestGrowGroup!)),1,cards[source.id].name);if(source.id===16&&once(source,'harvestDraw')&&living(p).some((x:any)=>x!==source&&tribe(x,'Gourmet')))draw(s,who,1,'Jellybean Juggler');if(source.id===44&&once(source,'harvestHeal'))heal(s,who,living(p).filter((x:any)=>tribe(x,'Canopy')),1,'Grandpa Grip');if(source.id===57&&once(source,'harvestMana')){p.mana++;log(s,'Sir Scales-a-Billion: +1 Harvest mana.');}if(source.id===63&&once(source,'harvestPing'))ping(s,who,1,'Thunderbranch Titan');if(source.id===77&&once(source,'harvestDraw'))draw(s,who,1,'Chrono-Chameleon');if(source.id===82&&once(source,'harvestGrow'))grow(s,who,living(p).filter((x:any)=>x!==source&&tribe(x,'Canopy')),1,'Celestial Salad');}
  }else if(a.kind==='attack'){
   const c=p.board[a.index],target=e.board[a.target];if(!canAttack(s,who,a.index))throw Error('This camo cannot attack: it needs positive attack and an unused visible action.');if(!slot(a.target)||!target||target.hidden)throw Error('Choose a visible enemy camo.');const damage=attackDamage(s,who,a.index,a.target);c.used=true;s.stats[who].attacks++;target.hp-=damage;log(s,cards[c.id].name+' attacks '+cards[target.id].name+' for '+damage+'.');finish(s);
   if(s.winner===null){if(c.id===40)heal(s,who,[c],2,'Count Camo-cula');if(tribe(c,'Trickster')&&++p.turnState.tricksterAttacks===1)for(const source of living(p)){if(source.id===65&&once(source,'attackDraw'))draw(s,who,2,'The Unlickable');if(source.id===80&&once(source,'attackHeal'))heal(s,who,living(p).filter((x:any)=>tribe(x,'Trickster')),1,'Velcro Voyager');}if(tribe(c,'Showtime')&&++p.turnState.showtimeAttacks===1)for(const source of living(p)){if(source.id===69&&once(source,'attackMana')){p.mana++;log(s,'Encore Iguana: +1 attack mana.');}if(source.id===76&&once(source,'attackDraw'))draw(s,who,1,'Baron Backstage');}if(tribe(c,'Gourmet')&&++p.turnState.gourmetAttacks===1)for(const source of living(p))if(source.id===78&&once(source,'attackHeal'))heal(s,who,[c],2,'Cocoa Corsair');}
