@@ -8,7 +8,7 @@ const put=(s,id,i)=>s.players[0].board[i]={id,hp:cards[id].hp,maxHp:cards[id].hp
 const fresh=()=>{const s=battle(starter().deck,starter().deck,false);s.players.forEach(p=>{p.pile=Array(100).fill(0);p.board[4]={id:51,hp:100,maxHp:100,hidden:false};});s.players[0].mana=100;return s;};
 const cycle=s=>{act(s,0,{kind:'end'});act(s,1,{kind:'end'});s.players[0].mana=100;};
 const play=(s,id,slot)=>{s.players[0].hand.push(id);act(s,0,{kind:'play',index:s.players[0].hand.length-1,slot});};
-assert.equal(cards.length,116);assert.equal(new Set(cards.map(c=>c.name)).size,116);
+assert.equal(cards.length,128);assert.equal(new Set(cards.map(c=>c.name)).size,128);
 for(const set of cardSets.filter(s=>s.id!=='core')){
  const pool=cards.filter(c=>c.set===set.id&&c.id<110);assert.equal(pool.length,8);assert.ok(set.combo.every(id=>cards[id].set===set.id));
  for(const card of pool){const s=fresh();play(s,card.id,0);assert.equal(s.players[0].board[0].id,card.id);
@@ -26,7 +26,7 @@ for(const [source,ally,group,amount] of [[89,86,'armor',1],[93,86,'attack',2],[9
 let s=fresh();put(s,86,0);put(s,88,1);put(s,92,2);put(s,87,3);let h=s.players[0].hand.length;act(s,0,{kind:'harvest',index:0});assert.equal(s.players[0].hand.length,h+1);assert.equal(s.players[0].mana,101);assert.equal(maxHealth(s.players[0].board[0]),cards[86].hp+1);assert.equal(maxHealth(s.players[0].board[2]),cards[92].hp);act(s,0,{kind:'harvest',index:3});assert.equal(s.players[0].hand.length,h+1);cycle(s);act(s,0,{kind:'harvest',index:0});assert.equal(maxHealth(s.players[0].board[0]),cards[86].hp+2);
 s=fresh();put(s,90,0);h=s.players[0].hand.length;cycle(s);assert.equal(s.players[0].hand.length,h+1);put(s,86,1);h=s.players[0].hand.length;cycle(s);assert.equal(s.players[0].hand.length,h+2);
 s=fresh();put(s,94,0);put(s,96,1);put(s,101,2);put(s,95,3);h=s.players[0].hand.length;cycle(s);assert.equal(s.players[0].hand.length,h+2);assert.equal(unitAttack(s,0,0),cards[94].attack+2);assert.equal(s.players[0].board[0].hidden,false);act(s,0,{kind:'hide',index:3});act(s,0,{kind:'hide',index:3});assert.equal(s.players[0].mana,99,'same-turn reveal cannot farm mana');assert.equal(s.players[0].hand.length,h+2);act(s,0,{kind:'end'});assert.equal(s.players[0].board[0].tempAttack,0);
-s=fresh();put(s,98,0);put(s,100,1);h=s.players[0].hand.length;act(s,0,{kind:'end'});act(s,1,{kind:'end'});assert.equal(s.players[0].hand.length,h+2);assert.equal(s.players[0].mana,3);
+s=fresh();put(s,98,0);put(s,100,1);h=s.players[0].hand.length;act(s,0,{kind:'end'});act(s,1,{kind:'end'});assert.equal(s.players[0].hand.length,h+2);assert.equal(s.players[0].mana,103);
 s=fresh();put(s,102,0);put(s,104,1);put(s,109,2);put(s,103,3);h=s.players[0].hand.length;cycle(s);assert.equal(s.players[0].hand.length,h+1,'full-health healing gives no bonus');s.players[0].board[3].hp=1;h=s.players[0].hand.length;cycle(s);assert.equal(s.players[0].hand.length,h+2);assert.equal(s.players[0].board[3].hp,2);assert.equal(s.players[0].board[3].bonusAttack,1);play(s,12);assert.equal(s.players[0].board[3].bonusAttack,1);cycle(s);assert.equal(s.players[0].board[3].bonusAttack,1,'permanent buff survives turn');
 s=fresh();put(s,106,0);put(s,108,1).hp=1;h=s.players[0].hand.length;cycle(s);assert.equal(s.players[0].board[1].hp,4);assert.equal(s.players[0].hand.length,h+2,'multiple actual heals draw only once');
 console.log('Passed: 24 unique set cards, all mixed/set pulls, set-specific pools and Chase fallback, paid/free bulk packs, invalid-set rejection, Harvest/reveal/heal combos, auras, trigger caps and resets.');

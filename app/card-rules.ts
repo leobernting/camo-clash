@@ -5,7 +5,7 @@ export const cardSets=[
  {id:'masquerade',name:'Midnight Masquerade',color:'#ab96c0',description:'Hide, reveal, steal the spotlight.',combo:[94,96,101],guide:'Hide Masked Munchkin, then reveal it next turn. Velvet Usher draws a card and The Great Hiss-dini gives your Masquerade crew an attack burst.'},
  {id:'snack',name:'Snack Attack',color:'#d0a47b',description:'A little healing. A very big appetite.',combo:[102,104,109],guide:'Biscuit Bandage heals your Snack crew each turn. Soup-er Visor rewards an actual heal with a card, and Queen of Tarts turns healing into permanent attack.'}
 ];
-export type CardRule={set?:string;harvestDraw?:number;harvestGrowGroup?:string;revealDraw?:number;revealMana?:number;revealAttackGroup?:string;healDraw?:number;healAttackGroup?:string;passive?:boolean;cost?:number;attack?:number;hp?:number;text:string;tribe?:string;tags?:string[];harvest?:number;summonDraw?:number;summonMana?:number;startsHidden?:boolean;armor?:number;startDraw?:number;drawCondition?:string;startHeal?:string;startHealAmount?:number;startMana?:number;startManaCondition?:string;auraAttack?:number;auraAttackGroup?:string;auraArmor?:number;auraArmorGroup?:string};
+export type CardRule={set?:string;harvestDraw?:number;harvestGrowGroup?:string;revealDraw?:number;revealMana?:number;revealAttackGroup?:string;healDraw?:number;healAttackGroup?:string;passive?:boolean;cost?:number;attack?:number;hp?:number;text:string;tribe?:string;tags?:string[];harvest?:number;harvestBonus?:number;harvestCondition?:string;harvestHealSelf?:number;summonDraw?:number;summonMana?:number;startsHidden?:boolean;armor?:number;startDraw?:number;drawCondition?:string;startHeal?:string;startHealAmount?:number;startMana?:number;startManaCondition?:string;auraAttack?:number;auraAttackGroup?:string;auraArmor?:number;auraArmorGroup?:string};
 export const cardRules:Record<number,CardRule>={
  0:{attack:1,hp:2,tribe:'Canopy',harvest:1,text:'Harvest 1: use your action to gain 1 mana.'},
  1:{attack:3,hp:2,tribe:'Gourmet',text:'The first other Gourmet you summon each turn gives Toast +1 attack permanently.'},
@@ -122,5 +122,17 @@ export const cardRules:Record<number,CardRule>={
  112:{set:'core',tribe:'Canopy',harvest:2,startDraw:1,text:'Harvest 2. Start of your turn: draw an extra card.'},
  113:{set:'junction',tribe:'Clockwork',tags:['Junction','Vehicle'],harvest:2,harvestDraw:1,text:'Junction / Vehicle. Harvest 2. Your first Harvest each turn draws a card.'},
  114:{set:'masquerade',tribe:'Trickster',tags:['Masquerade'],startsHidden:true,startDraw:1,drawCondition:'hidden',auraAttack:1,auraAttackGroup:'Masquerade',text:'Masquerade. Arrives hidden. Your other Masquerade camos have +1 attack. Start of your turn: draw 1 extra if this was hidden.'},
- 115:{set:'snack',tribe:'Gourmet',tags:['Snack'],startHeal:'Snack',startHealAmount:2,healDraw:1,text:'Snack. Start of your turn: heal your Snack camos by 2. After your first actual heal each turn, draw a card.'}
+ 115:{set:'snack',tribe:'Gourmet',tags:['Snack'],startHeal:'Snack',startHealAmount:2,healDraw:1,text:'Snack. Start of your turn: heal your Snack camos by 2. After your first actual heal each turn, draw a card.'},
+ 116:{set:'core',tribe:'Canopy',harvest:1,text:'Generator. Harvest 1: use your action to gain 1 mana.'},
+ 117:{set:'core',tribe:'Clockwork',harvest:3,text:'Generator. Harvest 3: use your action to gain 3 mana. Cannot attack without an attack buff.'},
+ 118:{set:'core',tribe:'Canopy',passive:true,startMana:1,startManaCondition:'always',text:'Generator. Start of your turn: gain 1 extra mana. This does not use your action.'},
+ 119:{set:'junction',tribe:'Clockwork',tags:['Junction','Vehicle'],harvest:1,harvestBonus:1,harvestCondition:'land',text:'Junction / Vehicle. Harvest 1, or Harvest 2 while you have a land.'},
+ 120:{set:'junction',tribe:'Clockwork',tags:['Junction'],harvest:1,harvestBonus:1,harvestCondition:'Vehicle',text:'Junction. Harvest 1, or Harvest 2 while you have another friendly Vehicle.'},
+ 121:{set:'junction',tribe:'Clockwork',tags:['Junction','Vehicle'],passive:true,startMana:1,startManaCondition:'Vehicle',text:'Junction / Vehicle. Start of your turn: gain 1 extra mana if you have another friendly Vehicle.'},
+ 122:{set:'masquerade',tribe:'Trickster',tags:['Masquerade'],startsHidden:true,harvest:2,text:'Masquerade. Arrives hidden. Harvest 2, even while hidden. Harvest uses your action.'},
+ 123:{set:'masquerade',tribe:'Trickster',tags:['Masquerade'],startsHidden:true,harvest:1,revealMana:1,text:'Masquerade. Arrives hidden. Harvest 1. Reveal: gain 1 mana, once per turn.'},
+ 124:{set:'masquerade',tribe:'Trickster',tags:['Masquerade'],startsHidden:true,passive:true,startMana:1,startManaCondition:'hidden',text:'Masquerade. Arrives hidden. Start of your turn: gain 1 extra mana if this was hidden. It still reveals as usual.'},
+ 125:{set:'snack',tribe:'Gourmet',tags:['Snack'],harvest:1,harvestHealSelf:1,text:'Snack. Harvest 1 and heal this camo by 1. Healing a damaged camo triggers your healing combos.'},
+ 126:{set:'snack',tribe:'Gourmet',tags:['Snack'],harvest:1,harvestBonus:1,harvestCondition:'Gourmet',text:'Snack. Harvest 1, or Harvest 2 while you have another friendly Gourmet.'},
+ 127:{set:'snack',tribe:'Gourmet',tags:['Snack'],passive:true,startMana:2,startManaCondition:'Gourmet',text:'Snack. Start of your turn: gain 2 extra mana if you have another friendly Gourmet. This does not use your action.'}
 };
