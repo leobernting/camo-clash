@@ -164,7 +164,7 @@ export function unitAttack(s:any,who:number,index:number){const p=s.players[who]
 export function unitArmor(s:any,who:number,index:number){const p=s.players[who],c=p.board[index];if(!c)return 0;return (cardRules[c.id]?.armor||0)+(p.land===9?1:0)+living(p).filter((x:any)=>x!==c&&x.id===49&&tribe(c,'Trickster')).length+living(p).filter((x:any)=>x!==c).reduce((n:number,x:any)=>n+(cardRules[x.id]?.auraArmor&&member(c,cardRules[x.id].auraArmorGroup!)?cardRules[x.id].auraArmor!:0),0);}
 export function canAttack(s:any,who:number,index:number){const c=s.players[who].board[index];return s.round>2&&!!c&&c.hp>0&&!c.hidden&&!c.used&&unitAttack(s,who,index)>0;}
 export function hasReadyAttacker(s:any,who:number){return s.players[who].board.some((_:any,index:number)=>canAttack(s,who,index));}
-export function endTurnSoulBonus(s:any,who:number){return hasReadyAttacker(s,who)?END_TURN_SOULS:0;}
+export function endTurnSoulBonus(s:any,who:number){return hasReadyAttacker(s,who)&&!s.players[1-who].board.some((c:any)=>c&&c.hp>0&&!c.hidden)?END_TURN_SOULS:0;}
 export function attackDamage(s:any,who:number,index:number,target:number,bonus=0){const c=s.players[who].board[index],t=s.players[1-who].board[target];if(!c||!t||t.hidden||unitAttack(s,who,index)<=0)return 0;return Math.max(1,unitAttack(s,who,index)+(c.id===21&&t.hp>=5?2:0)+bonus-unitArmor(s,1-who,target));}
 function draw(s:any,who:number,n:number,source:string){const p=s.players[who],got=p.pile.splice(0,n);p.hand.push(...got);if(got.length)log(s,source+': drew '+got.length+' card'+(got.length===1?'':'s')+'.');return got.length;}
 function finish(s:any){s.players.forEach((p:any,i:number)=>p.board.forEach((c:any,j:number)=>{if(c&&c.hp<=0){s.players[1-i].souls+=cards[c.id].cost;s.stats[1-i].kills++;p.board[j]=null;log(s,cards[c.id].name+' defeated: +'+cards[c.id].cost+' souls.');}}));if(s.players[0].souls>=SOUL_TARGET)s.winner=0;else if(s.players[1].souls>=SOUL_TARGET)s.winner=1;return s;}
@@ -228,7 +228,7 @@ export function act(s:any,who:number,a:any,now=Date.now()){
   const c=p.board[a.index],target=e.board[a.target];if(s.round<=2)throw Error('Camos cannot attack on either player\'s first turn.');if(!canAttack(s,who,a.index))throw Error('This camo cannot attack: it needs positive attack and an unused visible action.');if(!slot(a.target)||!target||target.hidden)throw Error('Choose a visible enemy camo.');
   if(c.id===111){c.used=true;s.drawing={who,index:a.index,target:a.target,startedAt:now,deadline:now+10_000};log(s,'Pablo Picamasso: 10 seconds to trace a camo!');}else resolveAttack(s,who,a.index,a.target);
  }else if(a.kind==='end'){
-  const bonus=endTurnSoulBonus(s,who);if(bonus){p.souls+=bonus;log(s,'Unused camo ready to attack: +'+bonus+' souls.');}finish(s);if(s.winner!==null)return s;
+  const bonus=endTurnSoulBonus(s,who);if(bonus){p.souls+=bonus;log(s,'Ready attacker with no visible enemies: +'+bonus+' souls.');}finish(s);if(s.winner!==null)return s;
   p.lastTurnSpells=p.turnState.spells;for(const c of living(p))c.tempAttack=0;s.turn=1-who;s.round++;startTurn(s,1-who);
  }else throw Error('Unknown action.');
  return finish(s);
