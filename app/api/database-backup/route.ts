@@ -1,4 +1,4 @@
-import {env} from 'cloudflare:workers';
+import {env} from '../../turso';
 import {canExportDatabase} from '../../database-backup';
 export const dynamic='force-dynamic';
 export async function POST(req:Request){

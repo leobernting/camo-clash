@@ -1,6 +1,6 @@
 ﻿import assert from 'node:assert/strict';
 import {cards,canAttack} from '../app/game.ts';
-const base='http://127.0.0.1:5173';
+const base=process.env.TEST_BASE_URL||'http://127.0.0.1:5173';
 async function call(path,data,cookie){const r=await fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json',...(cookie?{Cookie:cookie}:{})},body:JSON.stringify(data)});const d=await r.json();return {r,d,cookie:r.headers.get('set-cookie')?.split(';')[0]};}
 const suffix=Date.now().toString(36),password=crypto.randomUUID();const one=await call('/api/game',{kind:'register',username:'test_a_'+suffix,password}),two=await call('/api/game',{kind:'register',username:'test_b_'+suffix,password});assert.equal(one.r.status,200,JSON.stringify(one.d));assert.equal(two.r.status,200,JSON.stringify(two.d));assert.ok(one.cookie.includes('camo_session='));assert.ok(one.r.headers.get('set-cookie').includes('HttpOnly'));
 let p1=await call('/api/game',{kind:'profile'},one.cookie),p2=await call('/api/game',{kind:'profile'},two.cookie);assert.equal(p1.d.profile.deck.length,40);assert.equal(p1.d.profile.coins,500);

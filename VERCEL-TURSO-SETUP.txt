@@ -1,0 +1,41 @@
+Camo Clash: Vercel + Turso
+
+Use the vercel-turso branch of https://github.com/leobernting/camo-clash.
+
+1. Create an EMPTY libSQL database in Turso. This migration uses @libsql/client
+   and the existing SQLite schema/triggers. If the dashboard offers different
+   database engines, choose libSQL for this version.
+
+2. Put the database URL and a database auth token in .env.local privately:
+     TURSO_DATABASE_URL=libsql://YOUR-DATABASE.turso.io
+     TURSO_AUTH_TOKEN=YOUR-TOKEN
+   .env.local is ignored by Git. Never use NEXT_PUBLIC_ for these values.
+
+3. Import the previously exported JSON backup, not a truncated database-viewer
+   result. On Node 22, run from this project:
+     node --env-file=.env.local scripts/import-turso.mjs FULL_PATH_TO_BACKUP_JSON
+   The importer refuses existing game tables, imports schema/data in one write
+   transaction, verifies all rows and recreates trade triggers after the data.
+   Existing account IDs, password hashes, decks and progress are preserved.
+
+4. In Vercel, import leobernting/camo-clash. Set its Production Branch to
+   vercel-turso. Use Next.js, Node 22, build command npm run build, and the
+   framework's default output directory. Do not use the Cloudflare build.
+
+5. Add TURSO_DATABASE_URL and TURSO_AUTH_TOKEN as server environment variables
+   in the Vercel project, then deploy. Use a separate test database for previews
+   if you enable automatic preview deployments.
+
+6. Test the Vercel deployment URL: existing login, collection/coins, decks,
+   farm, story progress, packs, trades and a full match.
+
+7. Add camo.enmansbyra.se in Vercel's project domain settings. Use the DNS
+   records Vercel supplies. The old Sites custom-domain registration is pending;
+   reconcile/remove it when ready to switch. The old Sites CNAME is NOT the
+   destination for the Vercel deployment.
+
+The original Sites game remains on the main branch. Database backups stay
+private in the original local checkout's outputs directory, outside GitHub.
+
+Authentication uses custom username/password sessions. The Vercel version
+does not trust the old host's identity headers from incoming requests.

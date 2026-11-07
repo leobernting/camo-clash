@@ -43,3 +43,7 @@ yarn-error.log*
 
 # OS metadata
 .DS_Store
+
+# Vercel account connection
+/.vercel/
+!/.env.example

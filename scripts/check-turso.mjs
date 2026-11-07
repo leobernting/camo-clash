@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {createClient} from '@libsql/client';
+import {TursoDatabase} from '../app/turso.ts';
+const client=createClient({url:':memory:',intMode:'number'}),db=new TursoDatabase(client);
+await db.prepare('CREATE TABLE sample(id TEXT PRIMARY KEY, value INTEGER)').run();
+assert.equal((await db.prepare('INSERT INTO sample VALUES(?,?)').bind("O'Neil",7).run()).meta.changes,1);
+assert.equal((await db.prepare('SELECT * FROM sample WHERE id=?').bind("O'Neil").first()).value,7);
+assert.equal(await db.prepare('SELECT * FROM sample WHERE id=?').bind('missing').first(),null);
+assert.deepEqual((await db.prepare('SELECT * FROM sample').all()).results,[{id:"O'Neil",value:7}]);
+assert.equal((await db.prepare('UPDATE sample SET value=8 WHERE id=? AND value=0').bind("O'Neil").run()).meta.changes,0);
+await assert.rejects(()=>db.batch([db.prepare('INSERT INTO sample VALUES(?,?)').bind('rollback',9),db.prepare('INSERT INTO sample VALUES(?,?)').bind("O'Neil",4)]));
+assert.equal(await db.prepare("SELECT * FROM sample WHERE id='rollback'").first(),null);
+const result=await db.batch([db.prepare('UPDATE sample SET value=10'),db.prepare('SELECT value FROM sample')]);assert.equal(result[0].meta.changes,1);assert.equal(result[1].results[0].value,10);
+client.close();console.log('Passed Turso adapter: bound values, SQL quoting, object rows, first/null, write counts, stale updates, atomic batch rollback and sequential reads.');
