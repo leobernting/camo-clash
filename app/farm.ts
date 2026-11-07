@@ -18,7 +18,7 @@ export function farmAction(p:any,a:any,now=Date.now(),random:()=>number=Math.ran
   p.owned[a.id]--;let removed=false;const copies=p.deck.filter((id:number)=>id===a.id).length;
   if(copies>p.owned[a.id]){p.deck.splice(p.deck.lastIndexOf(a.id),1);removed=true;}
   if(!p.owned[a.id])p.binder=p.binder.filter((id:number)=>id!==a.id);
-  farm.pens[a.slot]={kind:'camo',id:a.id,placedAt:now,busyUntil:0,restoreDeck:removed};
+  farm.pens[a.slot]={kind:'camo',id:a.id,placedAt:now,busyUntil:0,restoreDeck:removed,restoreDeckId:p.activeDeckId};
   return {message:removed?'Camo placed. One deck copy is resting here until you pick it up.':'Camo placed. Its card is held in this pen.'};
  }
  if(a.kind==='farmPickup'){
@@ -26,7 +26,8 @@ export function farmAction(p:any,a:any,now=Date.now(),random:()=>number=Math.ran
   if(pen.kind==='egg')throw Error('Your egg is still hatching.');
   if(now<pen.busyUntil)throw Error('This parent is caring for an egg. Pick it up after the hatch timer ends.');
   p.owned[pen.id]=(p.owned[pen.id]||0)+1;
-  if(pen.restoreDeck&&p.deck.length<40&&p.deck.filter((id:number)=>id===pen.id).length<Math.min(3,p.owned[pen.id]))p.deck.push(pen.id);
+  const restore=pen.restoreDeckId&&pen.restoreDeckId!==p.activeDeckId?p.decks?.find((d:any)=>d.id===pen.restoreDeckId)?.cards:p.deck;
+  if(pen.restoreDeck&&restore&&restore.length<40&&restore.filter((id:number)=>id===pen.id).length<Math.min(3,p.owned[pen.id]))restore.push(pen.id);
   farm.pens[a.slot]=null;return {message:'Camo picked up. Its card is back in your collection.'};
  }
  if(a.kind==='farmBreed'){

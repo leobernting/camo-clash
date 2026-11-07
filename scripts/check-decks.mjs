@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {starter,cards} from '../app/game.ts';
+import {ensureDecks,deckAction,saveDeck} from '../app/decks.ts';
+import {farmAction,validDeck} from '../app/farm.ts';
+const p=starter(),original=[...p.deck];ensureDecks(p);assert.deepEqual([...p.decks[0].cards].sort((a,b)=>a-b),original);const first=p.activeDeckId;
+deckAction(p,{kind:'deckDuplicate',id:first,name:'Second crew'});const second=p.activeDeckId;assert.notEqual(first,second);p.deck[0]=1;assert.equal(p.decks[0].cards[0],0);p.deck=[...original];
+const edited=[...original];edited[edited.indexOf(0)]=8;saveDeck(p,edited);assert.deepEqual(p.decks[1].cards,edited);assert.deepEqual([...p.decks[0].cards].sort((a,b)=>a-b),original);
+deckAction(p,{kind:'deckSelect',id:first});assert.deepEqual(p.deck,original);assert.ok(validDeck(p));deckAction(p,{kind:'deckRename',id:first,name:'Original crew'});assert.equal(p.decks[0].name,'Original crew');
+assert.throws(()=>saveDeck(p,Array(40).fill(0)),/three/);assert.throws(()=>saveDeck(p,[]),/40/);assert.throws(()=>deckAction(p,{kind:'deckSelect',id:'someone-else'}),/not found/);assert.throws(()=>deckAction(p,{kind:'deckCreate',name:' '}),/name/);
+farmAction(p,{kind:'farmPlace',slot:0,id:0},0);ensureDecks(p);assert.equal(p.deck.length,39);deckAction(p,{kind:'deckSelect',id:second});farmAction(p,{kind:'farmPickup',slot:0},1);ensureDecks(p);assert.deepEqual(p.deck,edited);assert.deepEqual([...p.decks[0].cards].sort((a,b)=>a-b),original);
+deckAction(p,{kind:'deckCreate',name:'Fresh build'});assert.equal(p.deck.length,0);assert.equal(validDeck(p),false);const empty=p.activeDeckId;deckAction(p,{kind:'deckDelete',id:empty});assert.equal(p.activeDeckId,first);assert.deepEqual([...p.deck].sort((a,b)=>a-b),original);deckAction(p,{kind:'deckDelete',id:second});assert.throws(()=>deckAction(p,{kind:'deckDelete',id:first}),/at least one/);
+for(const id of [91,99,107]){assert.equal(cards[id].cost,4);assert.equal(cards[id].rarity,'legendary');}for(const [id,cost] of [[4,4],[53,6],[57,5],[59,6],[77,6]])assert.equal(cards[id].cost,cost);
+console.log('Passed saved deck migration, independent copies, save/switch/rename/delete, card limits, farm pickup across decks, drafts and targeted legendary costs.');

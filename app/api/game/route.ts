@@ -1,3 +1,4 @@
+import {ensureDecks,deckAction,saveDeck} from '../../decks';
 import {env} from 'cloudflare:workers';
 import {ensureCosmetics,buyCosmetic,equipCosmetic,editProfile,publicProfile,appearance,dressBattle} from '../../cosmetics';
 import {accountUser,authenticate} from '../../accounts';
@@ -15,12 +16,14 @@ export async function POST(req:Request){try{if(req.headers.get('origin')&&req.he
  if(p.rulesVersion!==2){upgradeProfile(p);await write(key,p,row.version);row=await read(key);}
  if(!p.username){if(uid.startsWith('acct:')){const r=await db().prepare("SELECT data FROM records WHERE id LIKE 'account:%' AND json_extract(data,'$.uid')=? LIMIT 1").bind(uid).first<any>();p.username=r?JSON.parse(r.data).username:'Collector';}else p.username='Collector_'+uid.slice(-6);await write(key,p,row.version);row=await read(key);}
  if(p.characterExpansion!==2){grantWelcomeCards(p);await write(key,p,row.version);row=await read(key);}
- const beforeStyle=JSON.stringify(p);ensureCosmetics(p);ensureFarm(p);if(beforeStyle!==JSON.stringify(p)){await write(key,p,row.version);row=await read(key);}
+ const beforeStyle=JSON.stringify(p);ensureCosmetics(p);ensureFarm(p);ensureDecks(p);if(beforeStyle!==JSON.stringify(p)){await write(key,p,row.version);row=await read(key);}
  if(a.kind==='buyCosmetic'||a.kind==='equipCosmetic'||a.kind==='editProfile'){if(a.kind==='buyCosmetic')buyCosmetic(p,a.id);else if(a.kind==='equipCosmetic')equipCosmetic(p,a.id);else editProfile(p,a);await write(key,p,row.version);return Response.json({profile:p});}
  const beforeQuests=JSON.stringify(p.quests);dailyQuests(p);if(beforeQuests!==JSON.stringify(p.quests)){await write(key,p,row.version);row=await read(key);}
  if(a.kind==='claimQuest'){claimQuest(p,a.id);await write(key,p,row.version);return Response.json({profile:p});}
- if(['farmFood','farmPlace','farmPickup','farmBreed'].includes(a.kind)){const result=farmAction(p,a);await write(key,p,row.version);return Response.json({...result,profile:p});}
+ if(['farmFood','farmPlace','farmPickup','farmBreed'].includes(a.kind)){const result=farmAction(p,a);ensureDecks(p);await write(key,p,row.version);return Response.json({...result,profile:p});}
  if(a.kind==='profile')return Response.json({profile:p});
+ if(['deckCreate','deckDuplicate','deckSelect','deckRename','deckDelete'].includes(a.kind)){deckAction(p,a);await write(key,p,row.version);return Response.json({profile:p});}
+ if(a.kind==='save'&&a.field!=='binder'){saveDeck(p,a.list);await write(key,p,row.version);return Response.json({profile:p});}
  if(a.kind==='save'){const list=a.field==='binder'?a.list:a.list; if(!Array.isArray(list)||list.length>(a.field==='binder'?9:40)||list.some((id:any)=>!Number.isInteger(id)||!p.owned[id])||(a.field!=='binder'&&list.some((id:number)=>list.filter((x:number)=>x===id).length>Math.min(3,p.owned[id]))))throw Error('Invalid selection. Maximum three copies per card.');if(a.field!=='binder'&&list.length!==40)throw Error('A deck needs exactly 40 cards.');p[a.field==='binder'?'binder':'deck']=list;await write(key,p,row.version);return Response.json({profile:p});}
  if(a.kind==='pack'){const result=openPacks(p,a.count??1,Math.random,a.free===true,a.set??'all');await write(key,p,row.version);return Response.json(result);}
  if(a.kind==='publish'){const code=crypto.randomUUID();await insert('binder:'+code,{cards:p.binder,name:p.username||'Canopy Collector'});return Response.json({code});}
