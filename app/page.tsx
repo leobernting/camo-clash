@@ -1,5 +1,5 @@
-import StoryMap from './story-map';
 'use client';
+import StoryMap from './story-map';
 import {useState,useEffect} from 'react';
 import {cards,rarityLabel,cardSets} from './game';
 import CardArt from './card-art';
