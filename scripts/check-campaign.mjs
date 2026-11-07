@@ -1,0 +1,9 @@
+import assert from 'node:assert/strict';
+import {storyLevels,ensureCampaign,storyLevel,storyDeck,completeStory,quickOpponent,storyOpponent} from '../app/campaign.ts';
+import {cards,starter,battle,act} from '../app/game.ts';
+import {dressBattle} from '../app/cosmetics.ts';
+const p=starter();ensureCampaign(p);assert.deepEqual(p.campaign.completed,[]);assert.equal(storyLevel(p,'trailhead').id,'trailhead');assert.throws(()=>storyLevel(p,'crown'),/previous/);assert.throws(()=>storyLevel(p,'bad'),/not found/);
+assert.equal(new Set(storyLevels.map(l=>l.name)).size,8);assert.equal(new Set(storyLevels.map(l=>JSON.stringify(l.ids))).size,8);
+for(const l of storyLevels){const d=storyDeck(l);assert.equal(d.length,40);assert.ok(d.every(id=>cards[id]&&d.filter(n=>n===id).length<=3));const s=dressBattle(battle(p.deck,d),p,storyOpponent(l));assert.equal(s.players[1].appearance.displayName,l.name);assert.equal(s.players[1].appearance.mat,l.mat);assert.equal(s.players[1].appearance.sleeve,l.sleeve);s.round=3;s.players[0].souls=13;s.players[0].board[0]={id:0,hp:3,used:false,hidden:false,flags:{}};act(s,0,{kind:'end'});assert.equal(s.winner,0);const before=p.coins,packs=p.packTokens||0;assert.equal(completeStory(p,l.id),true);assert.equal(p.coins,before+l.coins);assert.equal(p.packTokens,packs+l.packs);assert.equal(completeStory(p,l.id),false);assert.equal(p.coins,before+l.coins);assert.equal(storyLevel(p,l.id).id,l.id);}
+assert.equal(p.campaign.completed.length,8);assert.equal(quickOpponent(p,()=>.99).id,'crown');assert.equal(quickOpponent(starter(),()=>.99).id,'hat');assert.equal(quickOpponent(starter(),()=>0).id,'trailhead');
+console.log('Passed eight unique rivals, 40-card themed decks with max-three copies, cosmetics, locked levels, sequential progress, idempotent coins/packs, replay rewards, boss completion and random skirmish pool.');

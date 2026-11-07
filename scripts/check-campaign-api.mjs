@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {spawnSync} from 'node:child_process';
+import {storyLevels} from '../app/campaign.ts';
+import {battle,starter} from '../app/game.ts';
+let cookie='';async function call(a,status=200){const r=await fetch('http://127.0.0.1:5173/api/game',{method:'POST',headers:{'Content-Type':'application/json',Cookie:cookie},body:JSON.stringify(a)});const d=await r.json();assert.equal(r.status,status,JSON.stringify(d));cookie=r.headers.get('set-cookie')?.split(';')[0]||cookie;return d;}
+await call({kind:'register',username:'story_'+Date.now().toString(36),password:crypto.randomUUID()});let {profile:p}=await call({kind:'profile'});assert.deepEqual(p.campaign.completed,[]);await call({kind:'start',level:'crown'},400);await call({kind:'start',level:'bad'},400);
+let {match}=await call({kind:'start',level:'trailhead'});assert.equal(match.storyLevel,'trailhead');assert.equal(match.players[1].appearance.displayName,storyLevels[0].name);
+async function fixture(room,level,winner=null){const state=battle(starter().deck,starter().deck);state.storyLevel=level;state.round=3;state.players[0].souls=13;state.players[0].board[0]={id:0,hp:3,maxHp:3,used:false,hidden:false,flags:{},bonusAttack:0,tempAttack:0};state.winner=winner;fs.writeFileSync('outputs/story-api-fixture.sql',`UPDATE records SET data=json_set(data,'$.state',json('${JSON.stringify(state).replaceAll("'","''")}')),version=version+1 WHERE id='match:${room}';`);const r=spawnSync(process.execPath,['--import','./scripts/sites-env.mjs','./node_modules/wrangler/bin/wrangler.js','d1','execute','DB','--local','--config','dist/server/wrangler.json','--persist-to','.wrangler/state','--file','outputs/story-api-fixture.sql'],{encoding:'utf8',windowsHide:true});assert.equal(r.status,0,r.stderr||r.stdout);}
+await fixture(match.room,'trailhead');let won=await call({kind:'action',room:match.room,action:{kind:'end'}});assert.equal(won.match.winner,0);assert.equal(won.profile.coins,650);assert.equal(won.profile.packTokens,1);assert.deepEqual(won.profile.campaign.completed,['trailhead']);
+for(let i=0;i<3;i++){const again=await call({kind:'poll',room:match.room});assert.equal(again.profile.coins,650);assert.equal(again.profile.packTokens,1);}
+const second=await call({kind:'start',level:'hat'});assert.equal(second.match.storyLevel,'hat');await call({kind:'start',level:'junction'},400);
+const replay=await call({kind:'start',level:'trailhead'});await fixture(replay.match.room,'trailhead');won=await call({kind:'action',room:replay.match.room,action:{kind:'end'}});assert.equal(won.profile.coins,770);assert.equal(won.profile.packTokens,1);
+await fixture(second.match.room,'hat',1);const loss=await call({kind:'poll',room:second.match.room});assert.equal(loss.profile.coins,805);assert.deepEqual(loss.profile.campaign.completed,['trailhead']);assert.equal(loss.profile.packTokens,1);
+const quick=await call({kind:'start'});assert.equal(quick.match.storyLevel,undefined);assert.ok(storyLevels.slice(0,2).some(l=>l.name===quick.match.players[1].appearance.displayName));
+console.log('Passed live API: locked-stage enforcement, rival identity, persisted story metadata, actual victory rewards/unlock, repeated-poll and replay reward protection, losses and non-story skirmishes.');
