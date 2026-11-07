@@ -6,7 +6,7 @@ import {accountUser,authenticate} from '../../accounts';
 import {ensureFarm,farmAction,validDeck} from '../../farm';
 import {openPacks} from '../../packs';
 import {dailyQuests,syncQuests,claimQuest} from '../../quests';
-import {BALANCE_VERSION,cards,starter,botDeck,battle,act,botStep,expireDrawing,upgradeProfile,grantWelcomeCards} from '../../game';
+import {BALANCE_VERSION,cards,starter,botDeck,battle,act,botStep,expireDrawing,upgradeProfile,grantWelcomeCards,grantSupportCards} from '../../game';
 export const dynamic='force-dynamic';
 const db=()=>env.DB!;
 async function read(id:string){return await db().prepare('SELECT data,version FROM records WHERE id=?').bind(id).first<any>();}
@@ -17,7 +17,7 @@ export async function POST(req:Request){try{if(req.headers.get('origin')&&req.he
  if(p.rulesVersion!==2){upgradeProfile(p);await write(key,p,row.version);row=await read(key);}
  if(!p.username){if(uid.startsWith('acct:')){const r=await db().prepare("SELECT data FROM records WHERE id LIKE 'account:%' AND json_extract(data,'$.uid')=? LIMIT 1").bind(uid).first<any>();p.username=r?JSON.parse(r.data).username:'Collector';}else p.username='Collector_'+uid.slice(-6);await write(key,p,row.version);row=await read(key);}
  if(p.characterExpansion!==2){grantWelcomeCards(p);await write(key,p,row.version);row=await read(key);}
- const beforeStyle=JSON.stringify(p);ensureCosmetics(p);ensureFarm(p);ensureDecks(p);ensureCampaign(p);if(beforeStyle!==JSON.stringify(p)){await write(key,p,row.version);row=await read(key);}
+ const beforeStyle=JSON.stringify(p);ensureCosmetics(p);ensureFarm(p);ensureDecks(p);ensureCampaign(p);grantSupportCards(p);if(beforeStyle!==JSON.stringify(p)){await write(key,p,row.version);row=await read(key);}
  if(a.kind==='buyCosmetic'||a.kind==='equipCosmetic'||a.kind==='editProfile'){if(a.kind==='buyCosmetic')buyCosmetic(p,a.id);else if(a.kind==='equipCosmetic')equipCosmetic(p,a.id);else editProfile(p,a);await write(key,p,row.version);return Response.json({profile:p});}
  const beforeQuests=JSON.stringify(p.quests);dailyQuests(p);if(beforeQuests!==JSON.stringify(p.quests)){await write(key,p,row.version);row=await read(key);}
  if(a.kind==='claimQuest'){claimQuest(p,a.id);await write(key,p,row.version);return Response.json({profile:p});}

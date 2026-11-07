@@ -1,6 +1,7 @@
+import {supportCards} from './support-cards.ts';
 import {camoOutline,drawingScore} from './drawing-rules.ts';
 import {cardRules} from './card-rules.ts';
-export const SOUL_TARGET=15,END_TURN_SOULS=2,BALANCE_VERSION=5;
+export const SOUL_TARGET=15,END_TURN_SOULS=2,BALANCE_VERSION=6;
 export {cardSets,rarityLabel,rarityOrder} from './card-rules.ts';
 export const cards = [
  ['Sprout Scout',1,1,3,'common','camo','Harvest: generate 1 mana.','#87c957'],
@@ -134,18 +135,20 @@ export const cards = [
 ["Smoothie Operator",2,0,4,"common","camo","","#d3b39b"],
 ["Sourdough Starter",3,1,5,"uncommon","camo","","#ceb98f"],
 ["Piggy Pudding",4,0,6,"rare","camo","","#c6a2a0"],
-["Midas McScales",5,3,6,"gold","camo","","#dfc06c"]
+["Midas McScales",5,3,6,"gold","camo","","#dfc06c"],
+...supportCards
 ].map((c,i)=>({id:i,name:c[0] as string,cost:c[1] as number,attack:c[2] as number,hp:c[3] as number,rarity:c[4] as string,type:c[5] as string,color:c[7] as string,...cardRules[i],set:cardRules[i]?.set||'core',tags:[...(cardRules[i]?.tags||[]),...(cardRules[i]?.harvest||cardRules[i]?.startMana?['Generator']:[])]}));
 
 export const starterDeck=()=>cards.filter(c=>c.id<16).flatMap(c=>Array(c.id<8?3:2).fill(c.id));
 export const botDeck=()=>{const d=starterDeck();[6,7,9,10,12,13,18,19,21,22,36].forEach((slot,i)=>d[slot]=[19,20,30,32,35,36,40,43,46,49,53][i]);return d;};
 export const starter=()=>({rulesVersion:2,coins:500,owned:Object.fromEntries(cards.filter(c=>c.id<16).map(c=>[c.id,3])),deck:starterDeck(),binder:[4,3,6,1,7,5],wins:0});
 export function upgradeProfile(p:any){if(p.rulesVersion!==2){cards.filter(c=>c.id<16).forEach(c=>p.owned[c.id]=Math.max(3,p.owned[c.id]||0));const next:number[]=[];for(const id of p.deck||[])if(cards[id]&&next.filter(x=>x===id).length<3)next.push(id);for(const id of starterDeck())if(next.length<40&&next.filter(x=>x===id).length<3)next.push(id);p.deck=next;p.rulesVersion=2;}return p;}
+export function grantSupportCards(p:any){if(p.supportExpansion!==1){for(const c of cards.filter(c=>c.id>=129))p.owned[c.id]=Math.max(1,p.owned[c.id]||0);p.supportExpansion=1;}return p;}
 export const shuffle=(a:any[])=>a.map(v=>({v,r:Math.random()})).sort((a,b)=>a.r-b.r).map(x=>x.v);
 export const canHarvest=(id:number)=>(cardRules[id]?.harvest||0)>0;
 export function harvestAmount(id:number,s?:any,who=0,index=-1){const r=cardRules[id],p=s?.players[who];if(!r?.harvest)return 0;const self=index>=0?index:p?.board.findIndex((c:any)=>c?.id===id),condition=r.harvestCondition;const yes=p&&(condition==='land'?p.land>=0:p.board.some((c:any,i:number)=>c&&c.hp>0&&i!==self&&(cards[c.id].tribe===condition||cards[c.id].tags.includes(condition||''))));return r.harvest+(yes?(r.harvestBonus||0):0);}
 export function grantWelcomeCards(p:any){if(!p.characterExpansion){for(const id of [19,20,26])p.owned[id]=Math.max(p.owned[id]||0,3);}if(p.characterExpansion!==2){for(const id of [30,36,45,51])p.owned[id]=Math.max(p.owned[id]||0,3);p.characterExpansion=2;}return p;}
-const newTurn=()=>({spells:0,harvests:0,hides:0,lands:0,tricksterAttacks:0,showtimeAttacks:0,gourmetAttacks:0,tribes:{} as Record<string,number>});
+const newTurn=()=>({reveals:0,heals:0,harvestTribes:{} as Record<string,number>,spells:0,harvests:0,hides:0,lands:0,tricksterAttacks:0,showtimeAttacks:0,gourmetAttacks:0,tribes:{} as Record<string,number>});
 const living=(p:any)=>p.board.filter((c:any)=>c&&c.hp>0);
 const tribe=(c:any,t:string)=>!!c&&cards[c.id]?.tribe===t;
 const tagged=(c:any,t:string)=>!!c&&cards[c.id]?.tags.includes(t);
@@ -153,34 +156,37 @@ const member=(c:any,group:string)=>tribe(c,group)||tagged(c,group);
 const once=(c:any,key:string)=>{c.flags ||= {};if(c.flags[key])return false;c.flags[key]=true;return true;};
 const log=(s:any,message:string)=>{s.log.unshift(message);s.log=s.log.slice(0,25);};
 export const maxHealth=(c:any)=>c.maxHp??cards[c.id].hp;
-export function cardCost(s:any,who:number,id:number){const p=s.players[who];return Math.max(1,cards[id].cost-(cards[id].tribe==='Gourmet'&&!p.turnState?.tribes?.Gourmet&&living(p).some((c:any)=>c.id===55)?1:0));}
-export function hideCost(s:any,who:number){return !s.players[who].turnState?.hides&&living(s.players[who]).some((c:any)=>c.id===62)?0:1;}
-export function unitAttack(s:any,who:number,index:number){const p=s.players[who],c=p.board[index];if(!c||c.hp<=0)return 0;let n=cards[c.id].attack+(c.bonusAttack||0)+(c.tempAttack||0)+(p.land===8?1:0);
+export function cardCost(s:any,who:number,id:number){const p=s.players[who];return Math.max(1,cards[id].cost-(cards[id].type==='camo'&&cards[id].tribe==='Gourmet'&&!p.turnState?.tribes?.Gourmet&&living(p).some((c:any)=>c.id===55)?1:0));}
+export function hideCost(s:any,who:number){const p=s.players[who];return !p.turnState?.hides&&(living(p).some((c:any)=>c.id===62)||cardRules[p.land]?.landHideDiscount&&living(p).some((c:any)=>tribe(c,'Trickster')))?0:1;}
+export const requiresEnemyTarget=(id:number)=>id===11||!!cardRules[id]?.targetEnemy;
+export function unitAttack(s:any,who:number,index:number){const p=s.players[who],c=p.board[index];if(!c||c.hp<=0)return 0;let n=cards[c.id].attack+(c.bonusAttack||0)+(c.tempAttack||0)+(p.land===8?1:0);const land=cardRules[p.land];if(land?.landAttack&&member(c,land.landAttackGroup!))n+=land.landAttack;
  if(c.id===26&&living(p).some((x:any)=>x!==c&&tribe(x,'Gourmet')))n+=2;
  if(c.id===27&&p.land>=0)n+=2;
  for(const source of living(p)){if(source===c)continue;if(source.id===32&&tribe(c,'Canopy')||source.id===41&&tribe(c,'Gourmet')||source.id===48&&tribe(c,'Clockwork')||source.id===50&&source.hidden&&tribe(c,'Trickster')||source.id===52&&tribe(c,'Trickster')||[14,18].includes(source.id)&&tribe(c,'Showtime'))n++;if(source.id===47&&tagged(c,'Vehicle'))n+=2;const aura=cardRules[source.id];if(aura?.auraAttack&&member(c,aura.auraAttackGroup!))n+=aura.auraAttack;}
  return Math.max(0,n);
 }
-export function unitArmor(s:any,who:number,index:number){const p=s.players[who],c=p.board[index];if(!c)return 0;return (cardRules[c.id]?.armor||0)+(p.land===9?1:0)+living(p).filter((x:any)=>x!==c&&x.id===49&&tribe(c,'Trickster')).length+living(p).filter((x:any)=>x!==c).reduce((n:number,x:any)=>n+(cardRules[x.id]?.auraArmor&&member(c,cardRules[x.id].auraArmorGroup!)?cardRules[x.id].auraArmor!:0),0);}
+export function unitArmor(s:any,who:number,index:number){const p=s.players[who],c=p.board[index];if(!c)return 0;return (cardRules[c.id]?.armor||0)+(p.land===9?1:0)+(cardRules[p.land]?.landArmor&&member(c,cardRules[p.land].landArmorGroup!)?cardRules[p.land].landArmor!:0)+living(p).filter((x:any)=>x!==c&&x.id===49&&tribe(c,'Trickster')).length+living(p).filter((x:any)=>x!==c).reduce((n:number,x:any)=>n+(cardRules[x.id]?.auraArmor&&member(c,cardRules[x.id].auraArmorGroup!)?cardRules[x.id].auraArmor!:0),0);}
 export function canAttack(s:any,who:number,index:number){const c=s.players[who].board[index];return s.round>2&&!!c&&c.hp>0&&!c.hidden&&!c.used&&unitAttack(s,who,index)>0;}
 export function hasReadyAttacker(s:any,who:number){return s.players[who].board.some((_:any,index:number)=>canAttack(s,who,index));}
 export function endTurnSoulBonus(s:any,who:number){return hasReadyAttacker(s,who)&&!s.players[1-who].board.some((c:any)=>c&&c.hp>0&&!c.hidden)?END_TURN_SOULS:0;}
 export function attackDamage(s:any,who:number,index:number,target:number,bonus=0){const c=s.players[who].board[index],t=s.players[1-who].board[target];if(!c||!t||t.hidden||unitAttack(s,who,index)<=0)return 0;return Math.max(1,unitAttack(s,who,index)+(c.id===21&&t.hp>=5?2:0)+bonus-unitArmor(s,1-who,target));}
 function draw(s:any,who:number,n:number,source:string){const p=s.players[who],got=p.pile.splice(0,n);p.hand.push(...got);if(got.length)log(s,source+': drew '+got.length+' card'+(got.length===1?'':'s')+'.');return got.length;}
 function finish(s:any){s.players.forEach((p:any,i:number)=>p.board.forEach((c:any,j:number)=>{if(c&&c.hp<=0){s.players[1-i].souls+=cards[c.id].cost;s.stats[1-i].kills++;p.board[j]=null;log(s,cards[c.id].name+' defeated: +'+cards[c.id].cost+' souls.');}}));if(s.players[0].souls>=SOUL_TARGET)s.winner=0;else if(s.players[1].souls>=SOUL_TARGET)s.winner=1;return s;}
-function heal(s:any,who:number,targets:any[],n:number,source:string){let total=0;for(const c of targets){if(!c||c.hp<=0)continue;const healed=Math.min(n,Math.max(0,maxHealth(c)-c.hp));c.hp+=healed;total+=healed;}if(total){log(s,source+': restored '+total+' health.');for(const c of living(s.players[who])){if([45,75,83].includes(c.id)&&once(c,'healDraw'))draw(s,who,1,cards[c.id].name);if(cardRules[c.id]?.healDraw&&once(c,'setHealDraw'))draw(s,who,cardRules[c.id].healDraw!,cards[c.id].name);if(cardRules[c.id]?.healAttackGroup&&once(c,'setHealPower'))for(const ally of living(s.players[who]))if(member(ally,cardRules[c.id].healAttackGroup!))ally.bonusAttack=(ally.bonusAttack||0)+1;if(c.id===71&&once(c,'healPower')){for(const ally of living(s.players[who]))if(tribe(ally,'Gourmet'))ally.bonusAttack=(ally.bonusAttack||0)+1;log(s,'Marmalade Medic: Gourmet team gained +1 attack.');}}}return total;}
+function heal(s:any,who:number,targets:any[],n:number,source:string){let total=0;for(const c of targets){if(!c||c.hp<=0)continue;const healed=Math.min(n,Math.max(0,maxHealth(c)-c.hp));c.hp+=healed;total+=healed;}if(total){const p=s.players[who];p.turnState ||= newTurn();p.turnState.heals=(p.turnState.heals||0)+1;if(cardRules[p.land]?.landHealMana&&p.turnState.heals===1){p.mana++;log(s,cards[p.land].name+': +1 healing mana.');}log(s,source+': restored '+total+' health.');for(const c of living(s.players[who])){if([45,75,83].includes(c.id)&&once(c,'healDraw'))draw(s,who,1,cards[c.id].name);if(cardRules[c.id]?.healDraw&&once(c,'setHealDraw'))draw(s,who,cardRules[c.id].healDraw!,cards[c.id].name);if(cardRules[c.id]?.healAttackGroup&&once(c,'setHealPower'))for(const ally of living(s.players[who]))if(member(ally,cardRules[c.id].healAttackGroup!))ally.bonusAttack=(ally.bonusAttack||0)+1;if(c.id===71&&once(c,'healPower')){for(const ally of living(s.players[who]))if(tribe(ally,'Gourmet'))ally.bonusAttack=(ally.bonusAttack||0)+1;log(s,'Marmalade Medic: Gourmet team gained +1 attack.');}}}return total;}
 function grow(s:any,who:number,targets:any[],n:number,source:string){for(const c of targets)c.maxHp=maxHealth(c)+n;heal(s,who,targets,n,source);}
 function ping(s:any,who:number,n:number,source:string){const targets=living(s.players[1-who]).filter((c:any)=>!c.hidden);for(const c of targets)c.hp-=n;if(targets.length)log(s,source+': '+n+' damage to each visible enemy.');finish(s);}
-function reveal(s:any,who:number,c:any){if(!c?.hidden)return;c.hidden=false;log(s,cards[c.id].name+' revealed.');if(!once(c,'reveal'))return;
+function reveal(s:any,who:number,c:any){if(!c?.hidden)return;c.hidden=false;const p=s.players[who];p.turnState ||= newTurn();p.turnState.reveals=(p.turnState.reveals||0)+1;if(cardRules[p.land]?.landRevealMana&&p.turnState.reveals===1){p.mana++;log(s,cards[p.land].name+': +1 reveal mana.');}log(s,cards[c.id].name+' revealed.');if(!once(c,'reveal'))return;
  if(cardRules[c.id]?.revealMana){s.players[who].mana+=cardRules[c.id].revealMana!;log(s,cards[c.id].name+': +'+cardRules[c.id].revealMana+' reveal mana.');}if(tagged(c,'Masquerade'))for(const source of living(s.players[who])){const rule=cardRules[source.id];if(rule?.revealDraw&&once(source,'setRevealDraw'))draw(s,who,rule.revealDraw,cards[source.id].name);if(rule?.revealAttackGroup&&once(source,'setRevealAttack'))for(const ally of living(s.players[who]))if(member(ally,rule.revealAttackGroup))ally.tempAttack=(ally.tempAttack||0)+2;}
  if([3,62].includes(c.id))draw(s,who,1,cards[c.id].name);
  if(c.id===22)c.tempAttack=(c.tempAttack||0)+2;
  if(c.id===56)ping(s,who,1,'Velvet Vanisher');if(c.id===80){s.players[who].mana++;log(s,'Velcro Voyager: +1 reveal mana.');}
  if(tribe(c,'Trickster'))for(const source of living(s.players[who])){if(source.id===24&&once(source,'revealMana')){s.players[who].mana++;log(s,'Captain Camo: +1 mana from a reveal.');}if(source.id===70&&once(source,'revealDraw'))draw(s,who,1,'Lantern Lurker');if(source.id===84&&once(source,'revealPower'))for(const ally of living(s.players[who]))if(tribe(ally,'Trickster'))ally.tempAttack=(ally.tempAttack||0)+1;}
 }
+function conceal(s:any,who:number,c:any){const p=s.players[who];p.turnState.hides++;c.hidden=true;c.used=true;log(s,cards[c.id].name+' hid.');for(const source of living(p))if(source.id===19&&once(source,'hideDraw'))draw(s,who,1,'Hat Camo');}
 function startTurn(s:any,who:number){const p=s.players[who],wasHidden=new Set(living(p).filter((c:any)=>c.hidden));p.turnState=newTurn();p.mana+=1;log(s,'Turn mana: +1. Unspent mana carries over.');for(const c of living(p)){c.used=false;c.flags={};c.tempAttack=0;}draw(s,who,1,'Turn draw');const baselineHand=p.hand.length;
  for(const c of [...wasHidden]){if(s.winner!==null)return;reveal(s,who,c);}
  if(s.winner!==null)return;
+ const land=cardRules[p.land];if(land?.landTurnManaGroup&&living(p).some((c:any)=>member(c,land.landTurnManaGroup!))){p.mana++;log(s,cards[p.land].name+': +1 turn mana.');}if(land?.landHealGroup)heal(s,who,living(p).filter((c:any)=>member(c,land.landHealGroup!)),1,cards[p.land].name);
  for(const c of living(p)){const r=cardRules[c.id];if(r?.startHeal)heal(s,who,r.startHeal==='self'?[c]:living(p).filter((x:any)=>member(x,r.startHeal!)),r.startHealAmount||1,cards[c.id].name);if(r?.startMana&&(r.startManaCondition==='always'||r.startManaCondition==='hidden'&&wasHidden.has(c)||r.startManaCondition==='land'&&p.land>=0||['Vehicle','Gourmet'].includes(r.startManaCondition||'')&&living(p).some((x:any)=>x!==c&&member(x,r.startManaCondition!))||!r.startManaCondition&&living(p).filter((x:any)=>x!==c&&tribe(x,'Clockwork')).length>=2)){p.mana+=r.startMana;log(s,cards[c.id].name+': +'+r.startMana+' mana.');}}
  for(const c of living(p)){const r=cardRules[c.id];if(!r?.startDraw)continue;const condition=r.drawCondition;const yes=!condition||condition==='harvester'&&living(p).some((x:any)=>x!==c&&canHarvest(x.id))||condition==='spell'&&(p.lastTurnSpells||0)>0||condition==='hidden'&&wasHidden.has(c)||condition==='land'&&p.land>=0||condition==='hand3'&&baselineHand<=3||condition==='hand4'&&baselineHand<=4||['Clockwork','Trickster'].includes(condition||'')&&living(p).some((x:any)=>x!==c&&tribe(x,condition!));if(yes)draw(s,who,r.startDraw,cards[c.id].name);}
 }
@@ -198,7 +204,7 @@ export function act(s:any,who:number,a:any,now=Date.now()){
  if(s.drawing){if(a.kind!=='drawSubmit'||s.drawing.who!==who)throw Error('Finish your drawing attack first.');const d=s.drawing;const score=now<=d.deadline?drawingScore(a.strokes):0;delete s.drawing;const bonus=Math.round(score*6);log(s,'Pablo Picamasso: '+Math.round(score*100)+'% outline accuracy, +'+bonus+' damage.');resolveAttack(s,who,d.index,d.target,bonus);return finish(s);}
  if(a.kind==='play'){
   const id=p.hand[a.index],card=cards[id],r=cardRules[id];if(!card)throw Error('Choose a card.');const square=a.slot===undefined?p.board.findIndex((x:any)=>!x):a.slot;
-  if(card.type==='camo'&&(!slot(square)||p.board[square]))throw Error('Choose an empty square.');if(id===11&&(!e.board[a.target]||e.board[a.target].hidden))throw Error('Choose a visible enemy first.');
+  if(card.type==='camo'&&(!slot(square)||p.board[square]))throw Error('Choose an empty square.');if(requiresEnemyTarget(id)&&(!slot(a.target)||!e.board[a.target]||e.board[a.target].hidden))throw Error('Choose a visible enemy first.');
   if(id===110&&(!slot(a.target)||!slot(a.otherTarget)||a.target===a.otherTarget||!e.board[a.target]||!e.board[a.otherTarget]||e.board[a.target].hidden||e.board[a.otherTarget].hidden))throw Error('Choose two different visible enemy camos to swap.');
   pay(cardCost(s,who,id));p.hand.splice(a.index,1);log(s,card.name+' played.');
   if(card.type==='camo'){
@@ -214,15 +220,29 @@ export function act(s:any,who:number,a:any,now=Date.now()){
   }else if(card.type==='land'){
    p.land=id;p.turnState.lands++;if(p.turnState.lands===1)for(const c of living(p)){if(c.id===15)grow(s,who,[c],1,'Pocket Pickle');if(c.id===66)draw(s,who,1,'Fern Accountant');if(c.id===58){p.mana++;log(s,'The Last Airbrancher: +1 mana from a land.');}}
   }else{
-   p.turnState.spells++;if(id===110){[e.board[a.target],e.board[a.otherTarget]]=[e.board[a.otherTarget],e.board[a.target]];log(s,'Branch Switcheroo: enemy camos swapped squares.');}else if(id===10)p.mana+=2;else if(id===11)e.board[a.target].hp-=3;else if(id===12)heal(s,who,living(p),3,'Morning Dew');else if(id===13)draw(s,who,2,'New Skin, Who Dis?');finish(s);
+   p.turnState.spells++;if(id===110){[e.board[a.target],e.board[a.otherTarget]]=[e.board[a.otherTarget],e.board[a.target]];log(s,'Branch Switcheroo: enemy camos swapped squares.');}else if(id===10)p.mana+=2;else if(id===11)e.board[a.target].hp-=3;else if(id===12)heal(s,who,living(p),3,'Morning Dew');else if(id===13)draw(s,who,2,'New Skin, Who Dis?');
+   const allies=(group:string)=>living(p).filter((c:any)=>member(c,group));
+   switch(r?.spell){
+    case 'roots':grow(s,who,allies('Canopy'),1,card.name);if(allies('Canopy').length>=2)draw(s,who,1,card.name);break;
+    case 'refill':draw(s,who,1,card.name);p.mana+=Math.min(2,allies('Canopy').length);break;
+    case 'bolt':e.board[a.target].hp-=allies('Vehicle').length?5:3;break;
+    case 'parts':heal(s,who,allies('Clockwork'),3,card.name);if(allies('Vehicle').length)draw(s,who,1,card.name);break;
+    case 'vanish':{const targets=allies('Trickster').filter((c:any)=>!c.hidden);for(const c of targets)conceal(s,who,c);if(targets.length)draw(s,who,1,card.name);break;}
+    case 'curtain':{const targets=allies('Trickster').filter((c:any)=>c.hidden);for(const c of targets){reveal(s,who,c);c.tempAttack=(c.tempAttack||0)+1;if(s.winner!==null)break;}if(targets.length&&s.winner===null)draw(s,who,1,card.name);break;}
+    case 'encore':for(const c of allies('Showtime'))c.tempAttack=(c.tempAttack||0)+2;if(allies('Showtime').length>=2)draw(s,who,1,card.name);break;
+    case 'spotlight':e.board[a.target].hp-=2+Math.min(3,allies('Showtime').length);break;
+    case 'soup':if(heal(s,who,allies('Gourmet'),3,card.name))draw(s,who,1,card.name);break;
+    case 'finale':if(heal(s,who,living(p),2,card.name))for(const c of allies('Gourmet'))c.bonusAttack=(c.bonusAttack||0)+1;break;
+   }finish(s);
+   if(s.winner===null&&p.turnState.spells===1&&cardRules[p.land]?.landSpellDrawGroup&&allies(cardRules[p.land].landSpellDrawGroup!).length)draw(s,who,1,cards[p.land].name);
    if(p.turnState.spells===1)for(const c of living(p)){if(s.winner!==null)break;if(c.id===38)heal(s,who,living(p).filter((x:any)=>tribe(x,'Gourmet')),2,'Sushi Roll Model');if(c.id===52)draw(s,who,1,'Lizard of Oz');if(c.id===54)grow(s,who,living(p).filter((x:any)=>tribe(x,'Trickster')),1,'Origami Overlord');if([33,64].includes(c.id))for(const x of living(p))if(tribe(x,'Showtime'))x.tempAttack=(x.tempAttack||0)+(c.id===64?2:1);if(c.id===43)ping(s,who,1,'Camo-nado');if(c.id===79){for(const ally of living(p))if(tribe(ally,'Showtime'))ally.tempAttack=(ally.tempAttack||0)+1;heal(s,who,living(p).filter((x:any)=>tribe(x,'Showtime')),1,'Neon Noodle');}if(c.id===85)heal(s,who,living(p).filter((x:any)=>tribe(x,'Showtime')),2,'Obsidian Orchestra');}
   }
  }else if(a.kind==='move'){
   if(!slot(a.index)||!slot(a.slot)||!p.board[a.index]||p.board[a.slot])throw Error('Move to an empty square.');p.board[a.slot]=p.board[a.index];p.board[a.index]=null;
  }else if(a.kind==='hide'){
-  const c=p.board[a.index];if(!slot(a.index)||!c)throw Error('Choose a chameleon.');if(c.hidden)reveal(s,who,c);else{pay(hideCost(s,who));p.turnState.hides++;c.hidden=true;c.used=true;log(s,cards[c.id].name+' hid.');for(const source of living(p))if(source.id===19&&once(source,'hideDraw'))draw(s,who,1,'Hat Camo');}
+  const c=p.board[a.index];if(!slot(a.index)||!c)throw Error('Choose a chameleon.');if(c.hidden)reveal(s,who,c);else{pay(hideCost(s,who));conceal(s,who,c);}
  }else if(a.kind==='harvest'){
-  const c=p.board[a.index];if(!slot(a.index)||!c||!canHarvest(c.id))throw Error('Only camos with Harvest can generate mana.');if(c.used)throw Error('This camo already acted.');c.used=true;p.turnState.harvests++;const gain=harvestAmount(c.id,s,who,a.index);p.mana+=gain;log(s,cards[c.id].name+': harvested '+gain+' mana.');if(cardRules[c.id]?.harvestHealSelf)heal(s,who,[c],cardRules[c.id].harvestHealSelf!,cards[c.id].name);
+  const c=p.board[a.index];if(!slot(a.index)||!c||!canHarvest(c.id))throw Error('Only camos with Harvest can generate mana.');if(c.used)throw Error('This camo already acted.');c.used=true;p.turnState.harvests++;const gain=harvestAmount(c.id,s,who,a.index);p.mana+=gain;p.turnState.harvestTribes ||= {};const harvestTribe=cards[c.id].tribe;if(harvestTribe)p.turnState.harvestTribes[harvestTribe]=(p.turnState.harvestTribes[harvestTribe]||0)+1;const land=cardRules[p.land];if(land?.landHarvestGroup&&member(c,land.landHarvestGroup)&&p.turnState.harvestTribes[land.landHarvestGroup]===1){p.mana++;log(s,cards[p.land].name+': +1 Harvest mana.');}log(s,cards[c.id].name+': harvested '+gain+' mana.');if(cardRules[c.id]?.harvestHealSelf)heal(s,who,[c],cardRules[c.id].harvestHealSelf!,cards[c.id].name);
   if(p.turnState.harvests===1)for(const source of living(p)){if(s.winner!==null)break;const rule=cardRules[source.id];if(rule?.harvestDraw&&once(source,'setHarvestDraw'))draw(s,who,rule.harvestDraw,cards[source.id].name);if(rule?.harvestGrowGroup&&once(source,'setHarvestGrow'))grow(s,who,living(p).filter((x:any)=>x!==source&&member(x,rule.harvestGrowGroup!)),1,cards[source.id].name);if(source.id===16&&once(source,'harvestDraw')&&living(p).some((x:any)=>x!==source&&tribe(x,'Gourmet')))draw(s,who,1,'Jellybean Juggler');if(source.id===44&&once(source,'harvestHeal'))heal(s,who,living(p).filter((x:any)=>tribe(x,'Canopy')),1,'Grandpa Grip');if(source.id===57&&once(source,'harvestMana')){p.mana++;log(s,'Sir Scales-a-Billion: +1 Harvest mana.');}if(source.id===63&&once(source,'harvestPing'))ping(s,who,1,'Thunderbranch Titan');if(source.id===77&&once(source,'harvestDraw'))draw(s,who,1,'Chrono-Chameleon');if(source.id===82&&once(source,'harvestGrow'))grow(s,who,living(p).filter((x:any)=>x!==source&&tribe(x,'Canopy')),1,'Celestial Salad');}
  }else if(a.kind==='attack'){
   const c=p.board[a.index],target=e.board[a.target];if(s.round<=2)throw Error('Camos cannot attack on either player\'s first turn.');if(!canAttack(s,who,a.index))throw Error('This camo cannot attack: it needs positive attack and an unused visible action.');if(!slot(a.target)||!target||target.hidden)throw Error('Choose a visible enemy camo.');
@@ -234,7 +254,7 @@ export function act(s:any,who:number,a:any,now=Date.now()){
  return finish(s);
 }
 export function botStep(s:any){if(s.turn!==1||s.winner!==null)return s;const p=s.players[1],e=s.players[0];if(s.drawing)return act(s,1,{kind:'drawSubmit',strokes:camoOutline.map(stroke=>stroke.map(([x,y])=>[Math.min(100,x+2),y]))});
- for(let i=0;i<p.hand.length;i++){const id=p.hand[i],c=cards[id];if(cardCost(s,1,id)>p.mana||c.type==='camo'&&!p.board.some((x:any)=>!x))continue;const visible=e.board.map((x:any,j:number)=>x&&!x.hidden?j:-1).filter((j:number)=>j>=0),target=visible[0]??-1;if(id===110&&visible.length<2)continue;if(id===11&&target<0||id===12&&!living(p).some((x:any)=>x.hp<maxHealth(x)))continue;return act(s,1,{kind:'play',index:i,target,otherTarget:visible[1]});}
+ for(let i=0;i<p.hand.length;i++){const id=p.hand[i],c=cards[id];if(cardCost(s,1,id)>p.mana||c.type==='camo'&&!p.board.some((x:any)=>!x))continue;const visible=e.board.map((x:any,j:number)=>x&&!x.hidden?j:-1).filter((j:number)=>j>=0),target=visible[0]??-1;if(id===110&&visible.length<2)continue;if(requiresEnemyTarget(id)&&target<0||id===12&&!living(p).some((x:any)=>x.hp<maxHealth(x)))continue;return act(s,1,{kind:'play',index:i,target,otherTarget:visible[1]});}
  for(let i=0;i<5;i++){const c=p.board[i];if(!c||c.used)continue;if(canHarvest(c.id)&&(unitAttack(s,1,i)===0||p.hand.some((id:number)=>cardCost(s,1,id)>p.mana)))return act(s,1,{kind:'harvest',index:i});const targets=e.board.map((x:any,j:number)=>({x,j})).filter(({x}:any)=>x&&!x.hidden).sort((a:any,b:any)=>(a.x.hp<=attackDamage(s,1,i,a.j)?-100:0)+a.x.hp-((b.x.hp<=attackDamage(s,1,i,b.j)?-100:0)+b.x.hp));if(targets.length){if(c.hidden&&s.round>2&&unitAttack(s,1,i)>0)return act(s,1,{kind:'hide',index:i});if(canAttack(s,1,i))return act(s,1,{kind:'attack',index:i,target:targets[0].j});}}
  return act(s,1,{kind:'end'});
 }
