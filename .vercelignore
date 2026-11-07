@@ -1,0 +1,9 @@
+node_modules
+.next
+outputs
+work
+art-direction
+.env*
+.wrangler
+.sites-runtime
+.git
