@@ -1,9 +1,9 @@
 import {cards,cardSets,rarityOrder} from './game';
-export const specialCards=cards.filter(c=>['hit','superhit','hyper','chase','gold'].includes(c.rarity)).map(c=>c.id);
+export const specialCards=cards.filter(c=>['hit','hyper','chase','gold'].includes(c.rarity)).map(c=>c.id);
 export const CHASE_CHANCE=1/2000;
 export const GOLD_CHANCE=1/100000;
-// A single hidden luck counter covers Hit, Super-hit and Hyper Rare together.
-// Initial per-pack odds: Hit 1.1%, Super-hit 0.55%, Hyper Rare 0.11%.
+// A single hidden luck counter covers Hit and Hyper Rare together.
+// Initial per-pack odds: Hit 1.65%, Hyper Rare 0.11%. Former Super-hit odds are included in Hit.
 // A modest 10% relative increase. Fixed Chase and Gold rolls stay unchanged.
 // Each miss adds 0.1 percentage points to the combined special-pull chance.
 export const specialChance=(misses:number)=>Math.min(1,.0176+Math.max(0,misses)*.001);
@@ -12,7 +12,7 @@ export function ordinaryRarity(roll:number,final=false){
  // Finale: Uncommon 5%, Rare 48.8%, Epic 33%, Legendary 13.2%.
  return final?(roll<.132?'legendary':roll<.462?'epic':roll<.95?'rare':'uncommon'):(roll<.505?'common':roll<.89?'uncommon':roll<.978?'rare':'epic');
 }
-export function specialTier(roll:number){return roll<1/16?'hyper':roll<6/16?'superhit':'hit';}
+export function specialTier(roll:number){return roll<1/16?'hyper':'hit';}
 export function openPacks(p:any,count:number,random:()=>number=Math.random,free=false,setId='all'){
  if(setId!=='all'&&!cardSets.some(s=>s.id===setId))throw Error('Choose a valid card set.');const collection=cards.filter(c=>!c.tokenOnly&&c.rarity!=='secret'&&(setId==='all'||c.set===setId&&!c.mixedOnly));
  if(!Number.isInteger(count)||count<1||count>50)throw Error('Choose between 1 and 50 packs.');if(free?(p.packTokens||0)<count:p.coins<count*30)throw Error(free?'Not enough earned packs.':'Not enough coins. Packs cost 30 coins each.');

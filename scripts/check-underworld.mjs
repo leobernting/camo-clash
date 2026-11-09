@@ -29,5 +29,5 @@ s=fresh();put(s,153,0,1);play(s,131,{target:0});play(s,131,{target:0});assert.eq
 s=fresh();put(s,149);put(s,156,1);assert.equal(unitArmor(s,0,0),1);play(s,163);assert.equal(unitAttack(s,0,0),3);assert.equal(s.players[0].hand.length,0);s.players[0].graveyard=[149];play(s,163);assert.equal(s.players[0].hand.length,1);
 p=starter();p.owned[148]=1;const invalid=[148,...p.deck.slice(1)];assert.equal(validDeck(p,invalid),false);assert.throws(()=>saveDeck(p,invalid),/copies/);
 for(const set of ['all','core','necro']){p=starter();p.coins=1500;for(let i=0;i<2;i++){const result=openPacks(p,25,Math.random,false,set);assert.ok(result.pulls.every(id=>cards[id].rarity!=='secret'&&!cards[id].tokenOnly));if(set==='necro')assert.ok(result.pulls.every(id=>cards[id].set==='necro'));}}
-for(const rarity of ['common','uncommon','rare','epic','legendary','hit','superhit','hyper','chase'])assert.ok(cards.some(c=>c.set==='necro'&&c.rarity===rarity));
+for(const rarity of ['common','uncommon','rare','epic','legendary','hit','hyper','chase'])assert.ok(cards.some(c=>c.set==='necro'&&c.rarity===rarity));
 console.log('Passed secret one-time claims, potato validation, boss/backfill rewards, permanent/farm/deck cheese conservation, Ray charging, Nino/Bread slots and souls, graveyards, resurrection limits, death caps, necro buffs, token deck rejection and pack isolation.');

@@ -1,8 +1,8 @@
 import {underworldRules,type UnderworldRule} from './underworld-cards.ts';
 import {supportRules,type SupportRule} from './support-cards.ts';
 export const tribes=['Canopy','Gourmet','Trickster','Clockwork','Showtime','Necromancer'] as const;
-export const rarityOrder=['common','uncommon','rare','epic','legendary','hit','superhit','hyper','chase','gold','secret'];
-export const rarityNames:Record<string,string>={common:'Common',uncommon:'Uncommon',rare:'Rare',epic:'Epic',legendary:'Legendary',hit:'Hit',superhit:'Super-hit',hyper:'Hyper Rare',chase:'Chase',gold:'Gold',secret:'Secret',token:'Token'};
+export const rarityOrder=['common','uncommon','rare','epic','legendary','hit','hyper','chase','gold','secret'];
+export const rarityNames:Record<string,string>={common:'Common',uncommon:'Uncommon',rare:'Rare',epic:'Epic',legendary:'Legendary',hit:'Hit',hyper:'Hyper Rare',chase:'Chase',gold:'Gold',secret:'Secret',token:'Token'};
 export const rarityLabel=(rarity:string)=>rarityNames[rarity]||rarity;
 export const cardSets=[
  {id:'necro',name:'Graveyard Shift',color:'#a99cbd',description:'Necromancers never let a good camo go to waste.',combo:[149,152,155],guide:'Harvest with Tomb Sprout. Fallen camos enter your graveyard; Ghoul Scout returns them to your hand and Tomb Raider revives cheap allies without retriggering summon abilities.'},

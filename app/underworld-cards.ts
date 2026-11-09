@@ -15,7 +15,7 @@ export const underworldCards=[
  ['Mourning Gecko',4,2,6,'epic','camo','','#a39db9'],
  ['Lich, Please',5,3,7,'legendary','camo','','#b7a1c9'],
  ['The Grave Rave',4,3,5,'hit','camo','','#a99ec8'],
- ['Count Re-Scalula',5,4,7,'superhit','camo','','#9f9ab7'],
+ ['Count Re-Scalula',5,4,7,'hit','camo','','#9f9ab7'],
  ['Afterlife of the Party',4,2,6,'hyper','camo','','#b6aed1'],
  ['The Last Rites',5,4,8,'chase','camo','','#a4bdba'],
  ['A Grave Mistake',2,0,0,'rare','spell','','#b6a4bc'],
