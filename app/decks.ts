@@ -20,6 +20,6 @@ export function deckAction(p:any,a:any){
 }
 export function saveDeck(p:any,list:any){
  if(!Array.isArray(list)||list.length!==40)throw Error('A deck needs exactly 40 cards.');
- if(list.some((id:any)=>!Number.isInteger(id)||!cards[id]||list.filter((n:number)=>n===id).length>Math.min(3,p.owned?.[id]||0)))throw Error('Maximum three copies per card, limited to copies you own.');
+ if(list.some((id:any)=>!Number.isInteger(id)||!cards[id]||cards[id].tokenOnly||list.filter((n:number)=>n===id).length>Math.min(3,p.owned?.[id]||0)))throw Error('Maximum three copies per card, limited to copies you own.');
  const active=ensureDecks(p);p.deck=[...list];active.cards=[...list];
 }

@@ -7,6 +7,7 @@ export async function POST(req:Request){try{
  const uid=await accountUser(req);if(!uid)return Response.json({error:'Sign in to trade.'},{status:401});const a:any=await req.json();const db=env.DB!;
  if(a.kind==='list'){const rows=await db.prepare("SELECT id,maker_name,offer,want,status,created,recipient_name,CASE WHEN recipient=? THEN 1 ELSE 0 END AS addressed,CASE WHEN maker=? THEN 1 ELSE 0 END AS mine FROM trades WHERE (status='open' AND (recipient IS NULL OR recipient=? OR maker=?)) OR maker=? OR taker=? ORDER BY created DESC LIMIT 100").bind(uid,uid,uid,uid,uid,uid).all();return Response.json({trades:rows.results});}
  if(a.kind==='create'){
+ if([a.offer,a.want].some(id=>cards[id]?.rarity==='secret'||cards[id]?.tokenOnly))throw Error('Secret rewards and tokens cannot be traded.');
  let recipient=null,recipientName=null;if(a.recipient){const username=String(a.recipient).trim().toLowerCase();const account=await db.prepare("SELECT data FROM records WHERE id=?").bind('account:'+username).first<any>();if(!account)throw Error('Player username not found. Ask them to create an account first.');const user=JSON.parse(account.data);if(user.uid===uid)throw Error('Choose another player.');recipient=user.uid;recipientName=user.username;}
 
  if(!Number.isInteger(a.offer)||!Number.isInteger(a.want)||!cards[a.offer]||!cards[a.want]||a.offer===a.want)throw Error('Choose two different cards.');

@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 import {stripTypeScriptTypes} from 'node:module';
 import {cards,starter,battle,act} from '../app/game.ts';
 const source=stripTypeScriptTypes(readFileSync(new URL('../app/packs.ts',import.meta.url),'utf8')).replace("'./game'",JSON.stringify(new URL('../app/game.ts',import.meta.url).href));const {openPacks,specialCards}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
-assert.equal(cards.length,144);assert.equal(cards.filter(c=>c.type==='camo').length,122);assert.equal(specialCards.length,28);for(const r of ['hit','superhit','hyper'])assert.equal(cards.filter(c=>c.rarity===r).length,r==='hyper'?3:10);
+assert.equal(cards.length,165);assert.equal(cards.filter(c=>c.type==='camo').length,140);assert.equal(specialCards.length,32);for(const r of ['hit','superhit','hyper'])assert.equal(cards.filter(c=>c.rarity===r).length,r==='hyper'?4:11);
 for(const card of cards.filter(c=>c.id>=54&&c.id<86)){
  const rolls=[];if(['hit','superhit','hyper'].includes(card.rarity)){rolls.push(0,card.rarity==='hyper'?0:card.rarity==='superhit'?.1:.5);const pool=cards.filter(c=>c.rarity===card.rarity);rolls.push((pool.findIndex(c=>c.id===card.id)+.1)/pool.length);}else rolls.push(.9);
  for(let slot=0;slot<7;slot++){if(slot===6&&['hit','superhit','hyper'].includes(card.rarity))continue;const target=slot===6&&!['hit','superhit','hyper'].includes(card.rarity),rarity=target?card.rarity:slot===6?'rare':'common';const pool=cards.filter(c=>!specialCards.includes(c.id)&&c.rarity===rarity);rolls.push(target?(rarity==='legendary'?.01:rarity==='rare'?.9:.2):slot===6?.9:.1,target?(pool.findIndex(c=>c.id===card.id)+.1)/pool.length:.5);}

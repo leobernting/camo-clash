@@ -5,7 +5,7 @@ export function ensureFarm(p:any,now=Date.now()){
  p.farm.pens=p.farm.pens.map((pen:any)=>pen?.kind==='egg'&&pen.readyAt<=now?{kind:'camo',id:pen.id,placedAt:pen.readyAt,busyUntil:0,restoreDeck:false,born:true}:pen);
  return p.farm;
 }
-export function validDeck(p:any,deck=p.deck){return Array.isArray(deck)&&deck.length===40&&deck.every((id:number)=>Number.isInteger(id)&&cards[id]&&deck.filter((n:number)=>n===id).length<=Math.min(3,p.owned?.[id]||0));}
+export function validDeck(p:any,deck=p.deck){return Array.isArray(deck)&&deck.length===40&&deck.every((id:number)=>Number.isInteger(id)&&cards[id]&&!cards[id].tokenOnly&&deck.filter((n:number)=>n===id).length<=Math.min(3,p.owned?.[id]||0));}
 export function farmAction(p:any,a:any,now=Date.now(),random:()=>number=Math.random){
  const farm=ensureFarm(p,now),slot=(n:any)=>Number.isInteger(n)&&n>=0&&n<FARM_PENS;
  if(a.kind==='farmFood'){
@@ -14,7 +14,7 @@ export function farmAction(p:any,a:any,now=Date.now(),random:()=>number=Math.ran
  }
  if(a.kind==='farmPlace'){
   if(!slot(a.slot)||farm.pens[a.slot])throw Error('Choose an empty pen.');
-  if(!Number.isInteger(a.id)||cards[a.id]?.type!=='camo'||!(p.owned[a.id]>0))throw Error('Choose a camo you own.');
+  if(!Number.isInteger(a.id)||cards[a.id]?.type!=='camo'||cards[a.id]?.tokenOnly||!(p.owned[a.id]>0))throw Error('Choose a camo you own.');
   p.owned[a.id]--;let removed=false;const copies=p.deck.filter((id:number)=>id===a.id).length;
   if(copies>p.owned[a.id]){p.deck.splice(p.deck.lastIndexOf(a.id),1);removed=true;}
   if(!p.owned[a.id])p.binder=p.binder.filter((id:number)=>id!==a.id);
@@ -36,7 +36,7 @@ export function farmAction(p:any,a:any,now=Date.now(),random:()=>number=Math.ran
   if(parents.some(p=>!p||p.kind!=='camo'||p.busyUntil>now))throw Error('Choose two available camos in your farm.');
   const empty=farm.pens.findIndex((pen:any)=>!pen);if(empty<0)throw Error('Leave an empty pen for the egg.');
   if(farm.food<BREED_FOOD)throw Error('Breeding needs 5 food. Buy some for your pantry.');
-  const family=cards[parents[random()<.5?0:1].id],pool=cards.filter(c=>c.type==='camo'&&['common','uncommon','rare'].includes(c.rarity)&&c.set===family.set);
+  const family=cards[parents[random()<.5?0:1].id],pool=cards.filter(c=>c.type==='camo'&&!c.tokenOnly&&['common','uncommon','rare'].includes(c.rarity)&&c.set===family.set);
   const child=pool[Math.min(pool.length-1,Math.floor(random()*pool.length))];
   farm.food-=BREED_FOOD;parents.forEach(p=>p.busyUntil=now+BREED_TIME);farm.pens[empty]={kind:'egg',id:child.id,readyAt:now+BREED_TIME};
   return {message:'An egg! It will hatch in one minute. Parents are safe in their pens.'};

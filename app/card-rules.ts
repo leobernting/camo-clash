@@ -1,16 +1,18 @@
+import {underworldRules,type UnderworldRule} from './underworld-cards.ts';
 import {supportRules,type SupportRule} from './support-cards.ts';
-export const tribes=['Canopy','Gourmet','Trickster','Clockwork','Showtime'] as const;
-export const rarityOrder=['common','uncommon','rare','epic','legendary','hit','superhit','hyper','chase','gold'];
-export const rarityNames:Record<string,string>={common:'Common',uncommon:'Uncommon',rare:'Rare',epic:'Epic',legendary:'Legendary',hit:'Hit',superhit:'Super-hit',hyper:'Hyper Rare',chase:'Chase',gold:'Gold'};
+export const tribes=['Canopy','Gourmet','Trickster','Clockwork','Showtime','Necromancer'] as const;
+export const rarityOrder=['common','uncommon','rare','epic','legendary','hit','superhit','hyper','chase','gold','secret'];
+export const rarityNames:Record<string,string>={common:'Common',uncommon:'Uncommon',rare:'Rare',epic:'Epic',legendary:'Legendary',hit:'Hit',superhit:'Super-hit',hyper:'Hyper Rare',chase:'Chase',gold:'Gold',secret:'Secret',token:'Token'};
 export const rarityLabel=(rarity:string)=>rarityNames[rarity]||rarity;
 export const cardSets=[
+ {id:'necro',name:'Graveyard Shift',color:'#a99cbd',description:'Necromancers never let a good camo go to waste.',combo:[149,152,155],guide:'Harvest with Tomb Sprout. Fallen camos enter your graveyard; Ghoul Scout returns them to your hand and Tomb Raider revives cheap allies without retriggering summon abilities.'},
  {id:'core',name:'Into the Wild',color:'#8da975',description:'The original canopy collection.',combo:[0,6,32],guide:'Harvest with Sprout Scout, draw with Petal Peeper, then boost your Canopy attackers with Camo-saurus Rex.'},
  {id:'junction',name:'Jungle Junction',color:'#89ac83',description:'All aboard the Harvest express.',combo:[86,88,92],guide:'Sapling Signalman harvests mana. Ticket Taker turns your first Harvest into a card, while Locomoss grows your Junction crew.'},
  {id:'masquerade',name:'Midnight Masquerade',color:'#ab96c0',description:'Hide, reveal, steal the spotlight.',combo:[94,96,101],guide:'Hide Masked Munchkin, then reveal it next turn. Velvet Usher draws a card and The Great Hiss-dini gives your Masquerade crew an attack burst.'},
  {id:'snack',name:'Snack Attack',color:'#d0a47b',description:'A little healing. A very big appetite.',combo:[102,104,109],guide:'Biscuit Bandage heals your Snack crew each turn. Soup-er Visor rewards an actual heal with a card, and Queen of Tarts turns healing into permanent attack.'}
 ];
-export type CardRule=SupportRule & {mixedOnly?:boolean;set?:string;harvestDraw?:number;harvestGrowGroup?:string;revealDraw?:number;revealMana?:number;revealAttackGroup?:string;healDraw?:number;healAttackGroup?:string;passive?:boolean;cost?:number;attack?:number;hp?:number;text:string;tribe?:string;tags?:string[];harvest?:number;harvestBonus?:number;harvestCondition?:string;harvestHealSelf?:number;summonDraw?:number;summonMana?:number;startsHidden?:boolean;armor?:number;startDraw?:number;drawCondition?:string;startHeal?:string;startHealAmount?:number;startMana?:number;startManaCondition?:string;auraAttack?:number;auraAttackGroup?:string;auraArmor?:number;auraArmorGroup?:string};
-export const cardRules:Record<number,CardRule>={...supportRules,
+export type CardRule=UnderworldRule & SupportRule & {mixedOnly?:boolean;set?:string;harvestDraw?:number;harvestGrowGroup?:string;revealDraw?:number;revealMana?:number;revealAttackGroup?:string;healDraw?:number;healAttackGroup?:string;passive?:boolean;cost?:number;attack?:number;hp?:number;text:string;tribe?:string;tags?:string[];harvest?:number;harvestBonus?:number;harvestCondition?:string;harvestHealSelf?:number;summonDraw?:number;summonMana?:number;startsHidden?:boolean;armor?:number;startDraw?:number;drawCondition?:string;startHeal?:string;startHealAmount?:number;startMana?:number;startManaCondition?:string;auraAttack?:number;auraAttackGroup?:string;auraArmor?:number;auraArmorGroup?:string};
+export const cardRules:Record<number,CardRule>={...supportRules,...underworldRules,
  0:{hp:3,attack:1,tribe:'Canopy',harvest:1,text:'Harvest 1: use your action to gain 1 mana.'},
  1:{hp:3,attack:3,tribe:'Gourmet',text:'The first other Gourmet you summon each turn gives Toast +1 attack permanently.'},
  2:{hp:5,attack:0,tribe:'Canopy',startHeal:'Canopy',text:'Start of your turn: heal all friendly Canopy camos by 1.'},

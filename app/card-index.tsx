@@ -2,9 +2,10 @@
 import {useState} from 'react';
 import {cards} from './game';
 import {tribes,cardSets,rarityOrder,rarityNames} from './card-rules';
+const indexCards=cards.filter(c=>!c.tokenOnly);
 const rarities=rarityOrder;
 export default function CardIndex({profile,Card}:any){const [setId,SetId]=useState('all'),[search,S]=useState(''),[type,T]=useState('all'),[rarity,R]=useState('all'),[ownership,O]=useState('all'),[sort,B]=useState('number'),[tribeFilter,F]=useState('all');
- const owned=cards.filter(c=>(profile?.owned?.[c.id]||0)>0).length;
+ const owned=indexCards.filter(c=>(profile?.owned?.[c.id]||0)>0).length;
  const results=cards.filter(c=>(setId==='all'||c.set===setId)&&(c.name+' '+cardSets.find(s=>s.id===c.set)?.name+' '+c.text+' '+c.tribe+' '+c.tags.join(' ')).toLowerCase().includes(search.toLowerCase())&&(tribeFilter==='all'||c.tribe===tribeFilter||c.tags.includes(tribeFilter))&&(type==='all'||c.type===type)&&(rarity==='all'||c.rarity===rarity)&&(ownership==='all'||ownership==='owned'&&profile?.owned?.[c.id]>0||ownership==='missing'&&!profile?.owned?.[c.id])).sort((a,b)=>sort==='name'?a.name.localeCompare(b.name):sort==='cost'?a.cost-b.cost||a.name.localeCompare(b.name):sort==='rarity'?rarities.indexOf(b.rarity)-rarities.indexOf(a.rarity):a.id-b.id);
  const groups=(sort==='rarity'?[...rarities].reverse():rarities).map(r=>({rarity:r,cards:results.filter(c=>c.rarity===r)})).filter(g=>g.cards.length>0);
  const clear=()=>{S('');T('all');R('all');O('all');F('all');SetId('all');};

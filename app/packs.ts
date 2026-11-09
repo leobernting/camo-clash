@@ -14,7 +14,7 @@ export function ordinaryRarity(roll:number,final=false){
 }
 export function specialTier(roll:number){return roll<1/16?'hyper':roll<6/16?'superhit':'hit';}
 export function openPacks(p:any,count:number,random:()=>number=Math.random,free=false,setId='all'){
- if(setId!=='all'&&!cardSets.some(s=>s.id===setId))throw Error('Choose a valid card set.');const collection=setId==='all'?cards:cards.filter(c=>c.set===setId&&!c.mixedOnly);
+ if(setId!=='all'&&!cardSets.some(s=>s.id===setId))throw Error('Choose a valid card set.');const collection=cards.filter(c=>!c.tokenOnly&&c.rarity!=='secret'&&(setId==='all'||c.set===setId&&!c.mixedOnly));
  if(!Number.isInteger(count)||count<1||count>50)throw Error('Choose between 1 and 50 packs.');if(free?(p.packTokens||0)<count:p.coins<count*30)throw Error(free?'Not enough earned packs.':'Not enough coins. Packs cost 30 coins each.');
  if(free)p.packTokens-=count;else p.coins-=count*30;p.chaseMisses=p.chaseMisses||0;p.packsOpened=p.packsOpened||0;const pulls:number[]=[];const hits:any[]=[];
  for(let pack=0;pack<count;pack++){
