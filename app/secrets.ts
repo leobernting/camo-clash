@@ -1,4 +1,8 @@
 export const POTATO_MENUS=['Collection','Deck builder','Pack shop','Farm'];
+export function isSecretDiscovered(p:any,id:number){
+ if(!p)return false;if((p.owned?.[id]||0)>0||p.farm?.pens?.some((pen:any)=>pen?.id===id))return true;
+ const q=p.secrets;return !!(id===144&&q?.rayClaimed||id===145&&q?.ballClaimed||id===146&&q?.cheeseForm==='guy'||id===147&&q?.ninoClaimed);
+}
 export function ensureSecrets(p:any){
  p.secrets ||= {potatoes:[],questStarted:false,rayClaimed:false,ninoClaimed:false,ballClaimed:false,cheeseForm:'ball'};
  if(p.campaign?.completed?.includes('crown')&&!p.secrets.ballClaimed){p.secrets.ballClaimed=true;p.owned[145]=1;}

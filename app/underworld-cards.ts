@@ -2,7 +2,7 @@ export type UnderworldRule={passive?:boolean;tokenOnly?:boolean;soulValue?:numbe
 export const underworldCards=[
  ['Shockwave Ray',3,2,5,'secret','camo','','#79babe'],
  ['Cheeseball',5,0,1,'secret','camo','','#e3bd62'],
- ['Cheese Guy',2,0,5,'secret','camo','','#d9b45e'],
+ ['Cheezy',2,0,5,'secret','camo','','#d9b45e'],
  ['Nino',2,2,3,'secret','camo','','#b6a17d'],
  ['Bread',1,2,1,'token','camo','','#d7b18a'],
  ['Tomb Sprout',1,1,3,'common','camo','','#91ab85'],
