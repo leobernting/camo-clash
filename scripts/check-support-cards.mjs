@@ -7,7 +7,7 @@ const fresh=()=>{const s=battle([],[],false);s.round=3;s.players.forEach(p=>{p.m
 const put=(s,id,i=0,who=0)=>s.players[who].board[i]={id,hp:cards[id].hp,maxHp:cards[id].hp,hidden:false,used:false,bonusAttack:0,tempAttack:0,flags:{}};
 const play=(s,id,extra={})=>{s.players[0].hand.push(id);return act(s,0,{kind:'play',index:s.players[0].hand.length-1,...extra});};
 const cycle=s=>{act(s,0,{kind:'end'});act(s,1,{kind:'end'});};
-assert.equal(cards.length,165);assert.equal(cards.filter(c=>c.type==='camo').length,140);assert.equal(cards.filter(c=>c.type==='spell').length,17);assert.equal(cards.filter(c=>c.type==='land').length,8);assert.equal(BALANCE_VERSION,7);assert.equal(new Set(cards.map(c=>c.name)).size,165);
+assert.equal(cards.length,165);assert.equal(cards.filter(c=>c.type==='camo').length,140);assert.equal(cards.filter(c=>c.type==='spell').length,17);assert.equal(cards.filter(c=>c.type==='land').length,8);assert.equal(BALANCE_VERSION,8);assert.equal(new Set(cards.map(c=>c.name)).size,165);
 let s=fresh(),a=put(s,0),b=put(s,2,1),other=put(s,1,2);const h=s.players[0].hand.length;play(s,129);assert.equal(a.maxHp,4);assert.equal(a.hp,4);assert.equal(b.maxHp,6);assert.equal(other.maxHp,3);assert.equal(s.players[0].hand.length,h+1);
 s=fresh();play(s,129);assert.equal(s.players[0].hand.length,0);for(const n of [0,1,2,3]){s=fresh();for(let i=0;i<n;i++)put(s,0,i);play(s,130);assert.equal(s.players[0].mana,48+Math.min(2,n));assert.equal(s.players[0].hand.length,1);}
 for(const vehicle of [false,true]){s=fresh();if(vehicle)put(s,20);const t=put(s,53,0,1),hp=t.hp;play(s,131,{target:0});assert.equal(t.hp,hp-(vehicle?5:3));}

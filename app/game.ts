@@ -2,7 +2,7 @@ import {underworldCards} from './underworld-cards.ts';
 import {supportCards} from './support-cards.ts';
 import {camoOutline,drawingScore} from './drawing-rules.ts';
 import {cardRules} from './card-rules.ts';
-export const SOUL_TARGET=15,END_TURN_SOULS=2,BALANCE_VERSION=7;
+export const SOUL_TARGET=15,END_TURN_SOULS=2,BALANCE_VERSION=8;
 export {cardSets,rarityLabel,rarityOrder} from './card-rules.ts';
 export const cards = [
  ['Sprout Scout',1,1,3,'common','camo','Harvest: generate 1 mana.','#87c957'],
